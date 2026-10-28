@@ -1,33 +1,50 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Image Forensics Lab</title>
-  <link rel="stylesheet" href="./styles.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090e19"><meta name="description" content="Laboratorio académico de procesamiento y análisis forense de imágenes digitales.">
+<title>Image Forensics Lab · Laboratorio digital</title>
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <main>
-    <p class="eyebrow">IFTS N.º 18 · Procesamiento de Imágenes</p>
-    <h1>Image Forensics Lab</h1>
-    <p>Laboratorio académico para explorar características de fotografías digitales.</p>
-    <p class="notice">Un mapa de bordes no demuestra que una fotografía haya sido alterada.</p>
+<div class="shell">
+<aside class="sidebar" aria-label="Navegación del laboratorio">
+  <a class="brand" href="./"><span class="brand-icon">⌬</span><span>IMAGE<span class="brand-light">FORENSICS</span><small>LABORATORY / IFTS 18</small></span></a>
+  <div class="nav-label">ESPACIO DE TRABAJO</div>
+  <nav><a href="#laboratorio" class="nav-link selected"><span>▣</span> Laboratorio <span class="nav-dot"></span></a><a href="#metodos" class="nav-link"><span>◈</span> Metodología</a></nav>
+  <div class="nav-label">TÉCNICAS</div>
+  <div class="tech selected-tech"><span class="tech-dot active"></span> Detección de bordes <b>ACTIVO</b></div>
+  <div class="tech"><span class="tech-dot"></span> Histogramas <span>PRÓX.</span></div>
+  <div class="tech"><span class="tech-dot"></span> Análisis de ruido <span>PRÓX.</span></div>
+  <div class="tech"><span class="tech-dot"></span> Recompresión JPEG <span>PRÓX.</span></div>
+  <div class="tech"><span class="tech-dot"></span> Machine Learning <span>PRÓX.</span></div>
+  <div class="sidebar-bottom"><span class="status-light"></span> PROTOTIPO ACADÉMICO <small>Versión 0.1 · Investigación en desarrollo</small></div>
+</aside>
+<main id="laboratorio">
+  <header class="topbar"><span>WORKSPACE <span class="crumb">/</span> IMAGE ANALYSIS</span><a href="https://github.com/ferfava/image-forensics-lab" target="_blank" rel="noopener noreferrer" class="github-link">↗ Ver repositorio</a></header>
+  <div class="content">
+    <div class="headline"><span class="overline"><span class="pulse"></span> DIGITAL IMAGE FORENSICS · RESEARCH LAB</span><h1>La imagen cuenta una historia.<br><em>Los píxeles, otra.</em></h1><p>Explorá las señales visuales de una fotografía mediante técnicas clásicas de procesamiento digital. Observá, compará y sacá tus propias conclusiones.</p></div>
+    <div class="info-strip"><span class="info-symbol">ⓘ</span><div><strong>Análisis exploratorio, no veredicto.</strong> Los mapas generados muestran características visuales y no certifican si una fotografía fue manipulada.</div></div>
+    <div class="section-heading"><div><span class="section-number">01 /</span><h2>Cargar imagen</h2></div><span class="section-aside">FORMATOS JPG · PNG &nbsp; | &nbsp; MÁX. 12 MB</span></div>
     <form id="analyze-form">
-      <label for="photo">Fotografía JPEG o PNG (máximo 12 MB)</label>
-      <input id="photo" type="file" accept="image/png,image/jpeg" required>
-      <button type="submit">Analizar bordes</button>
+      <label class="dropzone" id="dropzone" for="photo" tabindex="0">
+        <input id="photo" type="file" accept="image/png,image/jpeg" required>
+        <span class="upload-icon">↥</span><strong id="file-title">Arrastrá una imagen o hacé clic para explorar</strong>
+        <span id="file-subtitle">Elegí una fotografía para comenzar el análisis</span><span class="upload-tag">SELECCIONAR ARCHIVO <span>↗</span></span>
+      </label>
+      <div class="controlbar"><div class="control-name"><span class="control-icon">◉</span><div><strong>Detección de bordes · Canny</strong><small>Umbrales: 100 / 200 · Procesamiento con OpenCV</small></div></div><button id="analyze-button" type="submit">Ejecutar análisis <span>→</span></button></div>
     </form>
-    <p id="status" role="status" aria-live="polite"></p>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
     <section id="results" hidden>
-      <p id="dimensions"></p>
-      <div class="gallery">
-        <figure><img id="original" alt="Fotografía original cargada"><figcaption>Imagen original</figcaption></figure>
-        <figure><img id="edges" alt="Mapa de bordes mediante Canny"><figcaption>Mapa de bordes (Canny)</figcaption></figure>
-      </div>
+      <div class="section-heading results-title"><div><span class="section-number">02 /</span><h2>Resultados del análisis</h2></div><span id="dimensions" class="section-aside"></span></div>
+      <div class="gallery"><figure><div class="figure-top"><span class="figure-dot"></span> ORIGINAL <span class="figure-tag">INPUT</span></div><div class="image-stage"><img id="original" alt="Fotografía original cargada"></div><figcaption>Fotografía de referencia</figcaption></figure><figure><div class="figure-top"><span class="figure-dot cyan"></span> MAPA DE BORDES <span class="figure-tag">OUTPUT</span></div><div class="image-stage"><img id="edges" alt="Mapa de bordes obtenido con Canny"></div><figcaption>Resultado del algoritmo Canny</figcaption></figure></div>
+      <p class="result-note">Este mapa resalta transiciones de intensidad; por sí solo no identifica alteraciones digitales.</p>
     </section>
-    <footer>Prototipo inicial. Los análisis forenses comparativos y modelos de ML se desarrollarán por etapas.</footer>
-  </main>
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
+    <section id="metodos" class="method"><div><span class="section-number">03 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
+    <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
+  </div>
+</main>
+</div>
+<script src="./config.js"></script><script src="./app.js"></script>
 </body>
 </html>
