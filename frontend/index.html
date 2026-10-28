@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Image Forensics Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">IFTS N.º 18 · Procesamiento de Imágenes</p>
+    <h1>Image Forensics Lab</h1>
+    <p>Laboratorio académico para explorar características de fotografías digitales.</p>
+    <p class="notice">Un mapa de bordes no demuestra que una fotografía haya sido alterada.</p>
+    <form id="analyze-form">
+      <label for="photo">Fotografía JPEG o PNG (máximo 12 MB)</label>
+      <input id="photo" type="file" accept="image/png,image/jpeg" required>
+      <button type="submit">Analizar bordes</button>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <section id="results" hidden>
+      <p id="dimensions"></p>
+      <div class="gallery">
+        <figure><img id="original" alt="Fotografía original cargada"><figcaption>Imagen original</figcaption></figure>
+        <figure><img id="edges" alt="Mapa de bordes mediante Canny"><figcaption>Mapa de bordes (Canny)</figcaption></figure>
+      </div>
+    </section>
+    <footer>Prototipo inicial. Los análisis forenses comparativos y modelos de ML se desarrollarán por etapas.</footer>
+  </main>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
