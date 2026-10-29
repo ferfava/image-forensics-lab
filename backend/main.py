@@ -42,6 +42,22 @@ async def analyze(file: UploadFile = File(...)):
         "blue": cv2.calcHist([rgb], [2], None, [256], [0, 256]).reshape(-1).astype(int).tolist(),
         "gray": cv2.calcHist([gray], [0], None, [256], [0, 256]).reshape(-1).astype(int).tolist(),
     }
+    # Filtrado clásico; mapas orientativos, no detectores de falsificación.
+    gaussian = cv2.GaussianBlur(rgb, (5, 5), 0)
+    median = cv2.medianBlur(rgb, 5)
+    residual = cv2.absdiff(rgb, gaussian)
+    # La visualización del residuo se amplifica para que pueda inspeccionarse.
+    residual_view = cv2.convertScaleAbs(residual, alpha=4.0)
+
+    def preview_png(array):
+        height, width = array.shape[:2]
+        if max(height, width) > 1000:
+            scale = 1000 / max(height, width)
+            array = cv2.resize(array, (round(width * scale), round(height * scale)), interpolation=cv2.INTER_AREA)
+        stream = BytesIO()
+        Image.fromarray(array).save(stream, format="PNG")
+        return base64.b64encode(stream.getvalue()).decode("ascii")
+
     output = BytesIO()
     Image.fromarray(edges).save(output, format="PNG")
     return {
@@ -49,6 +65,7 @@ async def analyze(file: UploadFile = File(...)):
         "height": int(rgb.shape[0]),
         "method": "Canny (umbrales 100 y 200)",
         "histograms": histograms,
+        "filters": {"gaussian_png_base64": preview_png(gaussian), "median_png_base64": preview_png(median), "residual_png_base64": preview_png(residual_view), "residual_mean": round(float(residual.mean()), 3)},
         "edge_map_png_base64": base64.b64encode(output.getvalue()).decode("ascii"),
         "disclaimer": "Los bordes no demuestran una manipulación de la imagen.",
     }

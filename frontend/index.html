@@ -15,7 +15,7 @@
   <div class="nav-label">TÉCNICAS</div>
   <div class="tech selected-tech"><span class="tech-dot active"></span> Detección de bordes <b>ACTIVO</b></div>
   <div class="tech selected-tech"><span class="tech-dot active"></span> Histogramas <b>ACTIVO</b></div>
-  <div class="tech"><span class="tech-dot"></span> Análisis de ruido <span>PRÓX.</span></div>
+  <div class="tech selected-tech"><span class="tech-dot active"></span> Filtrado y ruido <b>ACTIVO</b></div>
   <div class="tech"><span class="tech-dot"></span> Recompresión JPEG <span>PRÓX.</span></div>
   <div class="tech"><span class="tech-dot"></span> Machine Learning <span>PRÓX.</span></div>
   <div class="sidebar-bottom"><span class="status-light"></span> PROTOTIPO ACADÉMICO <small>Versión 0.1 · Investigación en desarrollo</small></div>
@@ -45,8 +45,15 @@
         <section class="hist-panel"><h3>Canales RGB <span>ROJO · VERDE · AZUL</span></h3><canvas id="rgb-hist" role="img" aria-label="Gráfico de los histogramas rojo verde y azul" width="900" height="300"></canvas></section>
         <section class="hist-panel"><h3>Escala de grises <span>LUMINOSIDAD</span></h3><canvas id="gray-hist" role="img" aria-label="Gráfico del histograma de intensidades de grises" width="900" height="300"></canvas></section>
       </div>
+      <div class="section-heading"><div><span class="section-number">04 /</span><h2>Filtrado y diferencias</h2></div><span class="section-aside">GAUSSIANO · MEDIANA · RESIDUO</span></div>
+      <p class="result-note">El filtro gaussiano suaviza variaciones; la mediana reduce impulsos. El residuo es la diferencia absoluta entre original y suavizada (amplificada ×4 para su visualización), no una medida exclusiva de ruido ni una prueba de edición.</p>
+      <div id="filter-results" class="filter-grid" hidden>
+        <figure><div class="figure-top">FILTRO GAUSSIANO <span class="figure-tag">5 × 5</span></div><div class="image-stage"><img id="gaussian" alt="Imagen suavizada con filtro gaussiano"></div><figcaption>Suavizado gaussiano de la imagen RGB</figcaption></figure>
+        <figure><div class="figure-top">FILTRO MEDIANA <span class="figure-tag">5 × 5</span></div><div class="image-stage"><img id="median" alt="Imagen filtrada mediante mediana"></div><figcaption>Filtrado de mediana de la imagen RGB</figcaption></figure>
+        <figure><div class="figure-top">MAPA DE DIFERENCIAS <span class="figure-tag">×4</span></div><div class="image-stage"><img id="residual" alt="Diferencia entre original y gaussiano, amplificada"></div><figcaption id="residual-metric">Residuo visual de alta frecuencia</figcaption></figure>
+      </div>
     </section>
-    <section id="metodos" class="method"><div><span class="section-number">04 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
+    <section id="metodos" class="method"><div><span class="section-number">05 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
     <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
   </div>
 </main>

@@ -104,8 +104,16 @@ form.addEventListener("submit", async event => {
       ]);
       drawHistogram("gray-hist", [{data:data.histograms.gray, color:"#d3e5f6"}]);
     }
+    const filterResults = document.querySelector("#filter-results");
+    if (data.filters) {
+      document.querySelector("#gaussian").src = "data:image/png;base64," + data.filters.gaussian_png_base64;
+      document.querySelector("#median").src = "data:image/png;base64," + data.filters.median_png_base64;
+      document.querySelector("#residual").src = "data:image/png;base64," + data.filters.residual_png_base64;
+      document.querySelector("#residual-metric").textContent = "Diferencia media absoluta: " + data.filters.residual_mean + " niveles de intensidad (antes de amplificar)";
+      filterResults.hidden = false;
+    } else { filterResults.hidden = true; }
     results.hidden = false;
-    status.textContent = "Análisis de bordes e histogramas completado.";
+    status.textContent = "Bordes, histogramas y filtros procesados.";
     results.scrollIntoView({behavior:"smooth",block:"start"});
   } catch (error) {
     status.textContent = "No se pudo completar el análisis. " + error.message;
