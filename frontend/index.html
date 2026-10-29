@@ -14,7 +14,7 @@
   <nav><a href="#laboratorio" class="nav-link selected"><span>▣</span> Laboratorio <span class="nav-dot"></span></a><a href="#metodos" class="nav-link"><span>◈</span> Metodología</a></nav>
   <div class="nav-label">TÉCNICAS</div>
   <div class="tech selected-tech"><span class="tech-dot active"></span> Detección de bordes <b>ACTIVO</b></div>
-  <div class="tech"><span class="tech-dot"></span> Histogramas <span>PRÓX.</span></div>
+  <div class="tech selected-tech"><span class="tech-dot active"></span> Histogramas <b>ACTIVO</b></div>
   <div class="tech"><span class="tech-dot"></span> Análisis de ruido <span>PRÓX.</span></div>
   <div class="tech"><span class="tech-dot"></span> Recompresión JPEG <span>PRÓX.</span></div>
   <div class="tech"><span class="tech-dot"></span> Machine Learning <span>PRÓX.</span></div>
@@ -39,8 +39,14 @@
       <div class="section-heading results-title"><div><span class="section-number">02 /</span><h2>Resultados del análisis</h2></div><span id="dimensions" class="section-aside"></span></div>
       <div class="gallery"><figure><div class="figure-top"><span class="figure-dot"></span> ORIGINAL <span class="figure-tag">INPUT</span></div><div class="image-stage"><img id="original" alt="Fotografía original cargada"></div><figcaption>Fotografía de referencia</figcaption></figure><figure><div class="figure-top"><span class="figure-dot cyan"></span> MAPA DE BORDES <span class="figure-tag">OUTPUT</span></div><div class="image-stage"><img id="edges" alt="Mapa de bordes obtenido con Canny"></div><figcaption>Resultado del algoritmo Canny</figcaption></figure></div>
       <p class="result-note">Este mapa resalta transiciones de intensidad; por sí solo no identifica alteraciones digitales.</p>
+      <div class="section-heading hist-title"><div><span class="section-number">03 /</span><h2>Histogramas de intensidad</h2></div><span class="section-aside">256 NIVELES · 0 A 255</span></div>
+      <p class="result-note">Cada curva muestra cuántos píxeles tienen una determinada intensidad. Los histogramas describen la distribución tonal, pero no prueban una manipulación.</p>
+      <div class="hist-grid">
+        <section class="hist-panel"><h3>Canales RGB <span>ROJO · VERDE · AZUL</span></h3><canvas id="rgb-hist" role="img" aria-label="Gráfico de los histogramas rojo verde y azul" width="900" height="300"></canvas></section>
+        <section class="hist-panel"><h3>Escala de grises <span>LUMINOSIDAD</span></h3><canvas id="gray-hist" role="img" aria-label="Gráfico del histograma de intensidades de grises" width="900" height="300"></canvas></section>
+      </div>
     </section>
-    <section id="metodos" class="method"><div><span class="section-number">03 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
+    <section id="metodos" class="method"><div><span class="section-number">04 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
     <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
   </div>
 </main>
