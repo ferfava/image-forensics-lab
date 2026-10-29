@@ -35,12 +35,20 @@ async def analyze(file: UploadFile = File(...)):
 
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
     edges = cv2.Canny(gray, 100, 200)
+    # Histogramas calculados con OpenCV: frecuencia de intensidades de 0 a 255.
+    histograms = {
+        "red": cv2.calcHist([rgb], [0], None, [256], [0, 256]).reshape(-1).astype(int).tolist(),
+        "green": cv2.calcHist([rgb], [1], None, [256], [0, 256]).reshape(-1).astype(int).tolist(),
+        "blue": cv2.calcHist([rgb], [2], None, [256], [0, 256]).reshape(-1).astype(int).tolist(),
+        "gray": cv2.calcHist([gray], [0], None, [256], [0, 256]).reshape(-1).astype(int).tolist(),
+    }
     output = BytesIO()
     Image.fromarray(edges).save(output, format="PNG")
     return {
         "width": int(rgb.shape[1]),
         "height": int(rgb.shape[0]),
         "method": "Canny (umbrales 100 y 200)",
+        "histograms": histograms,
         "edge_map_png_base64": base64.b64encode(output.getvalue()).decode("ascii"),
         "disclaimer": "Los bordes no demuestran una manipulación de la imagen.",
     }
