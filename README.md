@@ -18,6 +18,7 @@ Laboratorio académico de procesamiento y análisis exploratorio de imágenes di
 - Suavizado gaussiano y filtro de mediana, más residuo visual.
 - ELA (Error Level Analysis): recompresión JPEG con calidad 90, mapa de diferencias sin amplificar, control de contraste visual y error medio absoluto.
 - Comparador de dos imágenes: mapa absoluto RGB ×4 visual, máscara de cambios por píxel con umbral >20, diferencia media absoluta y porcentaje de píxeles sobre umbral.
+- Evaluación opcional de la máscara detectada frente a una máscara de referencia conocida: precisión, recall, F1, IoU y TP/FP/FN/TN.
 
 **Interpretación ELA:** regiones brillantes pueden corresponder a detalles, texturas, bordes, formatos previos o ediciones legítimas. No permiten concluir manipulación por sí solas. El control de amplificación (×1 a ×64) permite inspeccionar el mapa sin alterar los datos ni la métrica. Para comparar imágenes hay que usar la misma calidad y la misma amplificación; aun así los mapas no son una prueba de autenticidad.
 
@@ -64,3 +65,15 @@ Ver [protocolo](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
 6. Los mapas mostrados pueden reducirse para visualizarse; las métricas siempre se calculan a resolución completa.
 
 **Limitaciones:** diferencias de iluminación, compresión, color, exportación o desalineación generan cambios incluso sin manipulación maliciosa. Para pruebas controladas, partir de una copia idéntica y modificar una región conocida, manteniendo el mismo tamaño.
+
+## Evaluación experimental con máscara de referencia
+
+En `/api/compare`, el tercer archivo `ground_truth` es opcional: PNG/JPEG en blanco y negro, con **las mismas dimensiones** que las dos fotos. Blanco (luminancia >=128) = región realmente modificada; negro = resto. Los cálculos se hacen antes de reducir las imágenes para visualización.
+
+Se comparan los píxeles marcados por la máscara detectada (máxima diferencia de canales RGB >20) con los de la máscara de referencia. Se presentan:
+- **Precisión:** TP/(TP+FP), entre los marcados, cuántos corresponden a la región anotada.
+- **Recall:** TP/(TP+FN), qué porcentaje de la región anotada fue recuperado.
+- **F1:** 2TP/(2TP+FP+FN).
+- **IoU:** TP/(TP+FP+FN).
+
+Si ambas máscaras están vacías se devuelve 1.0 por coincidencia perfecta, acompañado del indicador `empty_case=true`. Un valor alto mide coincidencia frente a la máscara suministrada, **no certificación de autenticidad**. Las máscaras de referencia deben delinearse a partir de la edición conocida, no a partir de la predicción, para evitar una evaluación circular.
