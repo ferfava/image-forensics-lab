@@ -75,6 +75,7 @@
           <label class="compare-upload" for="compare-reference"><span>01 · REFERENCIA</span><strong>Seleccionar imagen original</strong><input id="compare-reference" type="file" accept="image/jpeg,image/png" required><small id="compare-reference-name">JPG o PNG · hasta 12 MB</small></label>
           <label class="compare-upload" for="compare-candidate"><span>02 · VERSIÓN DE PRUEBA</span><strong>Seleccionar imagen modificada</strong><input id="compare-candidate" type="file" accept="image/jpeg,image/png" required><small id="compare-candidate-name">JPG o PNG · hasta 12 MB</small></label>
         </div>
+        <label class="compare-upload gt-upload" for="compare-ground-truth"><span>03 · MÁSCARA DE REFERENCIA (OPCIONAL)</span><strong>Seleccionar máscara real de la modificación</strong><input id="compare-ground-truth" type="file" accept="image/jpeg,image/png"><small id="compare-ground-truth-name">Blanco = región editada · Negro = fondo · mismas dimensiones</small></label>
         <div class="controlbar"><div class="control-name"><span class="control-icon">⇄</span><div><strong>Comparación píxel a píxel</strong><small>Umbral de cambio: 20/255 · mapa visual ×4</small></div></div><button id="compare-button" type="submit">Comparar imágenes <span>→</span></button></div>
       </form>
       <p id="compare-status" class="status" role="status" aria-live="polite"></p>
@@ -84,6 +85,13 @@
           <figure><div class="figure-top">VERSIÓN DE PRUEBA <span class="figure-tag">B</span></div><div class="image-stage"><img id="compare-edited" alt="Imagen de comparación"></div><figcaption>Archivo de entrada B</figcaption></figure>
           <figure><div class="figure-top">DIFERENCIA ABSOLUTA <span class="figure-tag">×4 VISUAL</span></div><div class="image-stage"><img id="compare-diff" alt="Mapa de diferencias absolutas"></div><figcaption>Contraste amplificado solo para visualización</figcaption></figure>
           <figure><div class="figure-top">MÁSCARA DE CAMBIO <span class="figure-tag">UMBRAL &gt;20</span></div><div class="image-stage"><img id="compare-mask" alt="Máscara binaria de píxeles distintos"></div><figcaption>Blanco: al menos un canal supera 20 niveles de diferencia</figcaption></figure>
+        </div>
+        <div id="evaluation-results" hidden>
+          <div class="section-heading"><div><span class="section-number">EVAL /</span><h2>Evaluación contra referencia conocida</h2></div><span class="section-aside">PRECISIÓN · RECALL · F1 · IoU</span></div>
+          <p class="result-note">Comparamos la máscara detectada automáticamente con una máscara conocida de la región editada. Esto mide coincidencia espacial, no autenticidad de una imagen.</p>
+          <div class="compare-grid"><figure><div class="figure-top">MÁSCARA REAL <span class="figure-tag">GROUND TRUTH</span></div><div class="image-stage"><img id="compare-truth" alt="Máscara real de la región editada"></div><figcaption>Blanco = área conocida de la modificación</figcaption></figure><figure><div class="figure-top">MÁSCARA DETECTADA <span class="figure-tag">UMBRAL &gt;20</span></div><div class="image-stage"><img id="compare-mask-eval" alt="Máscara detectada por diferencia de píxeles"></div><figcaption>Blanco = diferencia superior al umbral establecido</figcaption></figure></div>
+          <div class="evaluation-metrics"><div><span>PRECISIÓN</span><strong id="metric-precision">—</strong></div><div><span>RECALL</span><strong id="metric-recall">—</strong></div><div><span>F1</span><strong id="metric-f1">—</strong></div><div><span>IoU</span><strong id="metric-iou">—</strong></div></div>
+          <p id="evaluation-counts" class="result-note"></p>
         </div>
         <div class="ela-summary"><div><span>DIFERENCIA ABSOLUTA MEDIA</span><strong id="compare-mae">—</strong><small>Media por canal RGB, sin amplificación</small></div><div><span>PÍXELES SOBRE EL UMBRAL</span><strong id="compare-percent">—</strong><small>Porcentaje con diferencia máxima RGB &gt;20</small></div><div><span>DIMENSIONES</span><strong id="compare-dimensions">—</strong><small>Ambos archivos deben coincidir</small></div></div>
         <p class="result-note">Este procedimiento mide diferencias entre archivos, no probabilidad de manipulación. Para un experimento válido, conservá las mismas dimensiones, registrá el método de exportación y compará con una edición conocida.</p>
