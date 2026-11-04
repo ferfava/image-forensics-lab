@@ -46,6 +46,15 @@ def test_synthetic_pipeline_trains_and_infers(tmp_path):
     assert report["test"]["tp"] + report["test"]["fp"] + report["test"]["fn"] + report["test"]["tn"] > 0
     assert (tmp_path / "trained" / "model.joblib").exists()
     assert (tmp_path / "trained" / "metrics.json").exists()
+    assert (tmp_path / "trained" / "test_by_image.csv").exists()
+    assert set(report["class_balance"]) == {"train", "validation", "test"}
+    assert report["test_diagnostics"]["images"] > 0
+    with (tmp_path / "trained" / "test_by_image.csv").open(encoding="utf-8") as stream:
+        diagnostic_rows = list(csv.DictReader(stream))
+    assert len(diagnostic_rows) == report["test_diagnostics"]["images"]
+    assert sum(int(row["tp"]) for row in diagnostic_rows) == report["test"]["tp"]
+    assert sum(int(row["fp"]) for row in diagnostic_rows) == report["test"]["fp"]
+    assert sum(int(row["fn"]) for row in diagnostic_rows) == report["test"]["fn"]
     # Only read artifacts produced by this very test.
     import joblib
     artifact = joblib.load(tmp_path / "trained" / "model.joblib")
