@@ -40,7 +40,7 @@ Servir la carpeta `frontend/` con un servidor estático (por ejemplo, desde `fro
 ## Trabajo pendiente
 - Experimentar con textura, umbralización y morfología.
 - Preparar fotografías con modificaciones controladas y máscaras de referencia.
-- Extraer características por regiones, evaluar métodos clásicos y, si hay datos suficientes, Random Forest y SVM con división por fotografía original.
+- Validar con un dataset real la extracción por regiones, Random Forest y SVM ya implementados como prototipo experimental.
 - Registrar métricas (precisión, recall, F1, IoU), limitaciones e informe académico.
 - Validar despliegues, integración y pruebas antes de integrar a `main`.
 
@@ -77,3 +77,31 @@ Se comparan los píxeles marcados por la máscara detectada (máxima diferencia 
 - **IoU:** TP/(TP+FP+FN).
 
 Si ambas máscaras están vacías se devuelve 1.0 por coincidencia perfecta, acompañado del indicador `empty_case=true`. Un valor alto mide coincidencia frente a la máscara suministrada, **no certificación de autenticidad**. Las máscaras de referencia deben delinearse a partir de la edición conocida, no a partir de la predicción, para evitar una evaluación circular.
+
+## ML experimental (sin desplegar al público)
+
+Primer prototipo **local** con Random Forest y SVM. La entrada de inferencia es **una sola imagen**, sin referencia original. Extrae por parches de 32 × 32: intensidad y desviación estándar, Laplaciano, densidad de bordes, gradiente, variación RGB y residuo JPEG. Elige entre RF y SVM según F1 en validación; reporta métricas finales una sola vez sobre test no visto, separado por fotografía de origen.
+
+En PowerShell desde la raíz:
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\python.exe -m image_forensics.detection.synthetic_data --out data/ml_synthetic
+.\.venv\Scripts\python.exe -m image_forensics.detection.train --manifest data/ml_synthetic/manifest.csv --out models/experimental
+.\.venv\Scripts\python.exe -m pytest tests/test_ml_pipeline.py -v
+.\.venv\Scripts\python.exe -m image_forensics.detection.infer --model models/experimental/model.joblib --image data/ml_synthetic/images/sample_001.png --out outputs/ml_mask.png
+```
+
+Se generan `models/experimental/model.joblib` y `models/experimental/metrics.json`. Los archivos `data/`, `models/` y archivos locales de prueba no se suben al repositorio. **No cargar modelos .joblib de terceros desconocidos.**
+
+El dataset sintético es únicamente una **prueba técnica del pipeline**. Sus resultados no sirven para demostrar que el modelo detecta fotos trucadas reales. Se requieren fotografías reales y editadas de diversas fuentes, máscaras independientes, partición por original, análisis por tipo de edición, IoU por píxel e intervalos de incertidumbre. Parches de borde incompletos se omiten; la máscara de inferencia tiene resolución de bloques, no contornos de precisión fina.
+
+### Manifest para un dataset real
+
+Archivo CSV UTF-8 con columnas `image,mask,group,source`, rutas relativas al CSV, por ejemplo:
+```csv
+image,mask,group,source
+images/foto1_editada.png,masks/foto1_editada.png,foto1,edicion_controlada
+images/foto1_otra_edicion.png,masks/foto1_otra_edicion.png,foto1,edicion_controlada
+images/foto2.png,masks/foto2.png,foto2,edicion_controlada
+```
+Todas las derivaciones de una fotografía original deben llevar el mismo identificador `group`, incluso si son distintas modificaciones.
