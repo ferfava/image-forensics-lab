@@ -12,6 +12,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from image_forensics.preprocessing.image_io import decode_rgb, MAX_UPLOAD_BYTES  # noqa: E402
 from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
+from image_forensics.processing.comparison import compare_rgb  # noqa: E402
 
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
@@ -71,4 +72,52 @@ async def analyze(file: UploadFile = File(...)):
         "ela": {"raw_map_png_base64": preview_png(ela_raw), "quality": 90, "mean_absolute_error": ela_mean, "suggested_scale": ela_scale},
         "edge_map_png_base64": base64.b64encode(output.getvalue()).decode("ascii"),
         "disclaimer": "Los bordes no demuestran una manipulación de la imagen.",
+    }
+
+
+@app.post("/api/compare")
+async def compare_images(reference: UploadFile = File(...), candidate: UploadFile = File(...)):
+    """Comparación controlada de dos imágenes, sin guardar archivos."""
+    reference_bytes = await reference.read(MAX_UPLOAD_BYTES + 1)
+    candidate_bytes = await candidate.read(MAX_UPLOAD_BYTES + 1)
+    try:
+        ref_rgb = decode_rgb(reference_bytes)
+        candidate_rgb = decode_rgb(candidate_bytes)
+        if ref_rgb.shape != candidate_rgb.shape:
+            raise HTTPException(
+                status_code=400,
+                detail="Las dos imágenes deben tener exactamente las mismas dimensiones. "
+                       "No se realiza redimensionamiento ni alineación automática.",
+            )
+        diff, mask, mae, changed = compare_rgb(ref_rgb, candidate_rgb, threshold=20)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    def preview_png(array):
+        height, width = array.shape[:2]
+        if max(height, width) > 900:
+            factor = 900 / max(height, width)
+            array = cv2.resize(
+                array, (round(width * factor), round(height * factor)),
+                interpolation=cv2.INTER_AREA if array.ndim == 3 else cv2.INTER_NEAREST
+            )
+        stream = BytesIO()
+        Image.fromarray(array).save(stream, format="PNG")
+        return base64.b64encode(stream.getvalue()).decode("ascii")
+
+    return {
+        "width": int(ref_rgb.shape[1]),
+        "height": int(ref_rgb.shape[0]),
+        "reference_png_base64": preview_png(ref_rgb),
+        "candidate_png_base64": preview_png(candidate_rgb),
+        "difference_png_base64": preview_png(
+            cv2.convertScaleAbs(diff, alpha=4.0)
+        ),
+        "mask_png_base64": preview_png(mask),
+        "mae": mae,
+        "changed_percent": changed,
+        "threshold": 20,
+        "amplification": 4,
+        "disclaimer": "La diferencia entre dos archivos no identifica la causa del cambio. "
+                      "La compresión, el color, el registro y la edición influyen.",
     }
