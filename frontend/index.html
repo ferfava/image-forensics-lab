@@ -54,7 +54,18 @@
       </div>
       <div class="section-heading"><div><span class="section-number">05 /</span><h2>Análisis de recompresión JPEG · ELA</h2></div><span class="section-aside">JPEG CALIDAD 90</span></div>
       <p class="result-note">ELA compara la imagen con una versión recomprimida en JPEG. El contraste se amplifica para visualizar diferencias; estas pueden originarse en textura, bordes, formato previo o procesamiento legítimo. No demuestra manipulación.</p>
-      <div id="ela-results" class="ela-grid" hidden><figure><div class="figure-top">MAPA ELA <span class="figure-tag">RECOMPRESIÓN 90</span></div><div class="image-stage"><img id="ela-map" alt="Mapa de diferencias ELA tras recompresión JPEG"></div><figcaption id="ela-metric">Diferencia media</figcaption></figure></div>
+      <div id="ela-results" hidden>
+        <div class="ela-controls">
+          <div><label for="ela-scale">Amplificación visual del mapa</label><p>Este ajuste solo modifica el contraste mostrado; no cambia el error calculado.</p></div>
+          <div class="ela-slider"><input id="ela-scale" type="range" min="1" max="64" step="1" value="12" aria-describedby="ela-scale-value"><output id="ela-scale-value" for="ela-scale">×12</output></div>
+        </div>
+        <div class="ela-grid">
+          <figure><div class="figure-top">IMAGEN DE REFERENCIA <span class="figure-tag">ORIGINAL</span></div><div class="image-stage"><img id="ela-original" alt="Imagen de referencia para comparación ELA"></div><figcaption>Entrada original usada para la recompresión</figcaption></figure>
+          <figure><div class="figure-top">MAPA ELA <span class="figure-tag">JPEG 90</span></div><div class="image-stage"><canvas id="ela-canvas" role="img" aria-label="Diferencia por píxel amplificada tras recompresión JPEG"></canvas></div><figcaption>Las zonas claras indican diferencias mayores con la recompresión, no falsificación.</figcaption></figure>
+        </div>
+        <div class="ela-summary"><div><span>ERROR ABSOLUTO MEDIO</span><strong id="ela-mae">—</strong><small>Niveles de intensidad (0–255), sin amplificación</small></div><div><span>CALIDAD DE RECOMPRESIÓN</span><strong>90</strong><small>JPEG · configuración experimental fija</small></div><div><span>FACTOR AUTOMÁTICO</span><strong id="ela-suggested">—</strong><small>Escala calculada según el máximo de diferencia</small></div></div>
+        <p class="result-note">Para comparar fotografías, usá la misma calidad JPEG y el mismo factor de amplificación. La media de diferencias mide cambios respecto de la recompresión, no probabilidad de edición.</p>
+      </div>
     </section>
     <section id="metodos" class="method"><div><span class="section-number">06 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
     <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
