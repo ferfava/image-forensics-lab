@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from image_forensics.preprocessing.image_io import decode_rgb, MAX_UPLOAD_BYTES  # noqa: E402
 from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
 from image_forensics.processing.comparison import compare_rgb  # noqa: E402
+from image_forensics.evaluation.segmentation import evaluate_mask  # noqa: E402
 
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
@@ -76,10 +77,15 @@ async def analyze(file: UploadFile = File(...)):
 
 
 @app.post("/api/compare")
-async def compare_images(reference: UploadFile = File(...), candidate: UploadFile = File(...)):
+async def compare_images(
+    reference: UploadFile = File(...),
+    candidate: UploadFile = File(...),
+    ground_truth: UploadFile | None = File(None),
+):
     """Comparación controlada de dos imágenes, sin guardar archivos."""
     reference_bytes = await reference.read(MAX_UPLOAD_BYTES + 1)
     candidate_bytes = await candidate.read(MAX_UPLOAD_BYTES + 1)
+    ground_truth_bytes = await ground_truth.read(MAX_UPLOAD_BYTES + 1) if ground_truth else None
     try:
         ref_rgb = decode_rgb(reference_bytes)
         candidate_rgb = decode_rgb(candidate_bytes)
@@ -90,6 +96,19 @@ async def compare_images(reference: UploadFile = File(...), candidate: UploadFil
                        "No se realiza redimensionamiento ni alineación automática.",
             )
         diff, mask, mae, changed = compare_rgb(ref_rgb, candidate_rgb, threshold=20)
+        gt_mask = None
+        metrics = None
+        if ground_truth_bytes is not None:
+            gt_rgb = decode_rgb(ground_truth_bytes)
+            if gt_rgb.shape != ref_rgb.shape:
+                raise HTTPException(
+                    status_code=400,
+                    detail="La máscara de referencia debe tener las mismas dimensiones que las imágenes."
+                )
+            # Luminosidad >= 128 en la referencia indica región positiva.
+            gt_gray = cv2.cvtColor(gt_rgb, cv2.COLOR_RGB2GRAY)
+            gt_mask = (gt_gray >= 128).astype("uint8") * 255
+            metrics = evaluate_mask(mask, gt_mask)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -114,6 +133,8 @@ async def compare_images(reference: UploadFile = File(...), candidate: UploadFil
             cv2.convertScaleAbs(diff, alpha=4.0)
         ),
         "mask_png_base64": preview_png(mask),
+        "ground_truth_png_base64": preview_png(gt_mask) if gt_mask is not None else None,
+        "evaluation": metrics,
         "mae": mae,
         "changed_percent": changed,
         "threshold": 20,
