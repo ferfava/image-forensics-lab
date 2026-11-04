@@ -11,7 +11,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from image_forensics.preprocessing.image_io import decode_rgb, MAX_UPLOAD_BYTES  # noqa: E402
-from image_forensics.processing.ela import compute_ela  # noqa: E402
+from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
 
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
@@ -49,7 +49,7 @@ async def analyze(file: UploadFile = File(...)):
     residual = cv2.absdiff(rgb, gaussian)
     # La visualización del residuo se amplifica para que pueda inspeccionarse.
     residual_view = cv2.convertScaleAbs(residual, alpha=4.0)
-    ela_map, ela_mean, ela_scale = compute_ela(rgb, quality=90)
+    ela_raw, ela_mean, ela_scale = compute_ela_raw(rgb, quality=90)
 
     def preview_png(array):
         height, width = array.shape[:2]
@@ -68,7 +68,7 @@ async def analyze(file: UploadFile = File(...)):
         "method": "Canny (umbrales 100 y 200)",
         "histograms": histograms,
         "filters": {"gaussian_png_base64": preview_png(gaussian), "median_png_base64": preview_png(median), "residual_png_base64": preview_png(residual_view), "residual_mean": round(float(residual.mean()), 3)},
-        "ela": {"map_png_base64": preview_png(ela_map), "quality": 90, "mean_absolute_error": ela_mean, "display_scale": ela_scale},
+        "ela": {"raw_map_png_base64": preview_png(ela_raw), "quality": 90, "mean_absolute_error": ela_mean, "suggested_scale": ela_scale},
         "edge_map_png_base64": base64.b64encode(output.getvalue()).decode("ascii"),
         "disclaimer": "Los bordes no demuestran una manipulación de la imagen.",
     }
