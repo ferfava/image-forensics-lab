@@ -168,3 +168,66 @@ form.addEventListener("submit", async event => {
     status.classList.add("error");
   } finally { button.disabled = false; }
 });
+
+/* Comparación experimental: dos entradas independientes del análisis individual. */
+const compareForm = document.querySelector("#compare-form");
+const compareStatus = document.querySelector("#compare-status");
+const compareResults = document.querySelector("#compare-results");
+const compareRefInput = document.querySelector("#compare-reference");
+const compareCandidateInput = document.querySelector("#compare-candidate");
+
+function onCompareFileChange(input, targetId) {
+  const file = input.files?.[0];
+  document.getElementById(targetId).textContent = file
+    ? file.name + " · " + (file.size / 1048576).toFixed(2) + " MB"
+    : "JPG o PNG · hasta 12 MB";
+  compareResults.hidden = true;
+  compareStatus.textContent = "";
+  compareStatus.classList.remove("error");
+}
+compareRefInput.addEventListener("change", () => onCompareFileChange(compareRefInput, "compare-reference-name"));
+compareCandidateInput.addEventListener("change", () => onCompareFileChange(compareCandidateInput, "compare-candidate-name"));
+
+compareForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const reference = compareRefInput.files?.[0];
+  const candidate = compareCandidateInput.files?.[0];
+  if (!reference || !candidate) return;
+  compareResults.hidden = true;
+  compareStatus.classList.remove("error");
+  if ([reference, candidate].some(file => file.size > 12 * 1024 * 1024 ||
+      !["image/jpeg", "image/png"].includes(file.type))) {
+    compareStatus.textContent = "Seleccioná dos imágenes JPG o PNG, de hasta 12 MB cada una.";
+    compareStatus.classList.add("error");
+    return;
+  }
+  const button = document.querySelector("#compare-button");
+  button.disabled = true;
+  compareStatus.textContent = "Comparando imágenes en el servidor...";
+  const dataToSend = new FormData();
+  dataToSend.append("reference", reference);
+  dataToSend.append("candidate", candidate);
+  try {
+    const base = (window.IMAGE_FORENSICS_API_URL || "").replace(/\/$/, "");
+    const response = await fetch(base + "/api/compare", { method: "POST", body: dataToSend });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(typeof data.detail === "string" ? data.detail : "No se pudo realizar la comparación.");
+    }
+    document.querySelector("#compare-original").src = "data:image/png;base64," + data.reference_png_base64;
+    document.querySelector("#compare-edited").src = "data:image/png;base64," + data.candidate_png_base64;
+    document.querySelector("#compare-diff").src = "data:image/png;base64," + data.difference_png_base64;
+    document.querySelector("#compare-mask").src = "data:image/png;base64," + data.mask_png_base64;
+    document.querySelector("#compare-mae").textContent = String(data.mae);
+    document.querySelector("#compare-percent").textContent = data.changed_percent + " %";
+    document.querySelector("#compare-dimensions").textContent = data.width + " × " + data.height;
+    compareResults.hidden = false;
+    compareStatus.textContent = "Comparación completada. Se mantienen las dimensiones originales para el cálculo.";
+    compareResults.scrollIntoView({behavior: "smooth", block: "start"});
+  } catch (error) {
+    compareStatus.textContent = "No se pudo completar la comparación. " + error.message;
+    compareStatus.classList.add("error");
+  } finally {
+    button.disabled = false;
+  }
+});
