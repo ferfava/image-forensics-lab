@@ -105,3 +105,24 @@ images/foto1_otra_edicion.png,masks/foto1_otra_edicion.png,foto1,edicion_control
 images/foto2.png,masks/foto2.png,foto2,edicion_controlada
 ```
 Todas las derivaciones de una fotografía original deben llevar el mismo identificador `group`, incluso si son distintas modificaciones.
+
+## Incorporación de datasets externos
+
+Fuentes candidatas (verificar las condiciones de uso antes de descargar):
+- IMD2020: https://staff.utia.cas.cz/novozada/db/ (fotografías manipuladas reales, originales y máscaras).
+- Image Forensics Dataset with Manipulation Masks: https://figshare.com/articles/dataset/Image_Forensics_Dataset_with_Manipulation_Masks/34603173 (CC BY 4.0 según la ficha del catálogo).
+
+No se incluyen datos externos en el repositorio ni se descarga nada automáticamente.
+Primero organizar en `data/real/` las imágenes y las máscaras binarias con rutas relativas en `manifest.csv`:
+```csv
+image,mask,group,source
+images/001_editada.png,masks/001.png,original_001,dataset_ejemplo
+```
+Si hay imágenes auténticas sin modificaciones, usar una máscara **negra** del mismo tamaño y definir `group` según la fotografía de origen. Distintas versiones de una misma fotografía deben compartir `group`. Confirmar que las máscaras son blanco/negro con valores 0 y 255 y que marcan el área realmente editada.
+
+Validar antes de entrenar:
+```powershell
+.\.venv\Scripts\python.exe -m image_forensics.detection.audit_dataset --manifest data/real/manifest.csv
+.\.venv\Scripts\python.exe -m pytest tests/test_dataset_audit.py -v
+```
+El auditor verifica dimensiones, archivos faltantes, duplicados, rutas, máscaras no binarias y cantidad de grupos. **No comprueba licencias, independencia real entre imágenes ni calidad científica de las anotaciones**: requieren revisión humana. No entrenar si hay problemas.
