@@ -126,3 +126,24 @@ Validar antes de entrenar:
 .\.venv\Scripts\python.exe -m pytest tests/test_dataset_audit.py -v
 ```
 El auditor verifica dimensiones, archivos faltantes, duplicados, rutas, máscaras no binarias y cantidad de grupos. **No comprueba licencias, independencia real entre imágenes ni calidad científica de las anotaciones**: requieren revisión humana. No entrenar si hay problemas.
+
+
+### Importar IMD2020 desde sus carpetas originales
+
+La estructura observada es `<caso>/<caso>_orig`, `<caso>/<id>_0`,
+`<caso>/<id>_0_mask`. Un caso puede contener **múltiples manipulaciones**.
+El importador mantiene el mismo `group` para todas las variantes del caso,
+convierte las máscaras a blanco/negro estricto, incluye el original con máscara
+negra y escribe `manifest_imd2020.csv` en la carpeta del dataset. No copia
+fotografías al repositorio.
+
+```powershell
+.\.venv\Scripts\python.exe -m image_forensics.detection.import_imd2020 --root "C:\RUTA\A\IMD2020" --max-groups 30
+.\.venv\Scripts\python.exe -m image_forensics.detection.audit_dataset --manifest "C:\RUTA\A\IMD2020\manifest_imd2020.csv"
+.\.venv\Scripts\python.exe -m pytest tests/test_imd2020_import.py -v
+```
+
+Reemplazar la ruta por la carpeta extraída con las subcarpetas `1a1ogs`,
+`1a3oag`, etc. Para el primer ensayo usar solo 30 casos; verificar
+`warning_examples`, `ready` y la licencia del dataset antes de entrenar.
+Las rutas se resuelven relativas al CSV: no mover el CSV solo.
