@@ -17,6 +17,7 @@ Laboratorio académico de procesamiento y análisis exploratorio de imágenes di
 - Histogramas RGB y en escala de grises.
 - Suavizado gaussiano y filtro de mediana, más residuo visual.
 - ELA (Error Level Analysis): recompresión JPEG con calidad 90, mapa de diferencias sin amplificar, control de contraste visual y error medio absoluto.
+- Comparador de dos imágenes: mapa absoluto RGB ×4 visual, máscara de cambios por píxel con umbral >20, diferencia media absoluta y porcentaje de píxeles sobre umbral.
 
 **Interpretación ELA:** regiones brillantes pueden corresponder a detalles, texturas, bordes, formatos previos o ediciones legítimas. No permiten concluir manipulación por sí solas. El control de amplificación (×1 a ×64) permite inspeccionar el mapa sin alterar los datos ni la métrica. Para comparar imágenes hay que usar la misma calidad y la misma amplificación; aun así los mapas no son una prueba de autenticidad.
 
@@ -52,3 +53,14 @@ Ver [protocolo](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
 5. Evitar interpretar mayor brillo como manipulación demostrada; la recompresión anterior y las texturas son variables de confusión.
 
 **Desarrollo local:** `frontend/config.js` debe apuntar a `http://127.0.0.1:8000` al usar el backend local. No subir ese cambio de configuración si el despliegue público sigue usando Render.
+
+## Comparador experimental (/api/compare)
+
+1. Cargar dos imágenes JPEG o PNG (cada una hasta 12 MB, 16 megapíxeles como máximo).
+2. La API exige idénticas dimensiones tras corregir orientación EXIF. No redimensiona ni alinea las entradas para calcular.
+3. Diferencia media absoluta (MAE): promedio de |RGB A − RGB B| por canal, rango 0–255.
+4. Máscara: un píxel se marca si **algún** canal tiene diferencia absoluta mayor que 20.
+5. Porcentaje: píxeles marcados dividido por el total de píxeles; no es porcentaje de falsificación.
+6. Los mapas mostrados pueden reducirse para visualizarse; las métricas siempre se calculan a resolución completa.
+
+**Limitaciones:** diferencias de iluminación, compresión, color, exportación o desalineación generan cambios incluso sin manipulación maliciosa. Para pruebas controladas, partir de una copia idéntica y modificar una región conocida, manteniendo el mismo tamaño.
