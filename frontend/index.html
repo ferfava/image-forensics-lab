@@ -67,7 +67,29 @@
         <p class="result-note">Para comparar fotografías, usá la misma calidad JPEG y el mismo factor de amplificación. La media de diferencias mide cambios respecto de la recompresión, no probabilidad de edición.</p>
       </div>
     </section>
-    <section id="metodos" class="method"><div><span class="section-number">06 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
+    <section id="comparador" class="compare-section">
+      <div class="section-heading"><div><span class="section-number">06 /</span><h2>Comparador experimental</h2></div><span class="section-aside">DOS IMÁGENES · MISMAS DIMENSIONES</span></div>
+      <p class="result-note">Compará una imagen de referencia con una versión editada de manera controlada. Se procesan los píxeles originales sin redimensionar ni alinear; una diferencia puede deberse a compresión, ajustes de color o desplazamiento, además de una edición.</p>
+      <form id="compare-form">
+        <div class="compare-upload-grid">
+          <label class="compare-upload" for="compare-reference"><span>01 · REFERENCIA</span><strong>Seleccionar imagen original</strong><input id="compare-reference" type="file" accept="image/jpeg,image/png" required><small id="compare-reference-name">JPG o PNG · hasta 12 MB</small></label>
+          <label class="compare-upload" for="compare-candidate"><span>02 · VERSIÓN DE PRUEBA</span><strong>Seleccionar imagen modificada</strong><input id="compare-candidate" type="file" accept="image/jpeg,image/png" required><small id="compare-candidate-name">JPG o PNG · hasta 12 MB</small></label>
+        </div>
+        <div class="controlbar"><div class="control-name"><span class="control-icon">⇄</span><div><strong>Comparación píxel a píxel</strong><small>Umbral de cambio: 20/255 · mapa visual ×4</small></div></div><button id="compare-button" type="submit">Comparar imágenes <span>→</span></button></div>
+      </form>
+      <p id="compare-status" class="status" role="status" aria-live="polite"></p>
+      <div id="compare-results" hidden>
+        <div class="compare-grid">
+          <figure><div class="figure-top">REFERENCIA <span class="figure-tag">A</span></div><div class="image-stage"><img id="compare-original" alt="Imagen de referencia"></div><figcaption>Archivo de entrada A</figcaption></figure>
+          <figure><div class="figure-top">VERSIÓN DE PRUEBA <span class="figure-tag">B</span></div><div class="image-stage"><img id="compare-edited" alt="Imagen de comparación"></div><figcaption>Archivo de entrada B</figcaption></figure>
+          <figure><div class="figure-top">DIFERENCIA ABSOLUTA <span class="figure-tag">×4 VISUAL</span></div><div class="image-stage"><img id="compare-diff" alt="Mapa de diferencias absolutas"></div><figcaption>Contraste amplificado solo para visualización</figcaption></figure>
+          <figure><div class="figure-top">MÁSCARA DE CAMBIO <span class="figure-tag">UMBRAL &gt;20</span></div><div class="image-stage"><img id="compare-mask" alt="Máscara binaria de píxeles distintos"></div><figcaption>Blanco: al menos un canal supera 20 niveles de diferencia</figcaption></figure>
+        </div>
+        <div class="ela-summary"><div><span>DIFERENCIA ABSOLUTA MEDIA</span><strong id="compare-mae">—</strong><small>Media por canal RGB, sin amplificación</small></div><div><span>PÍXELES SOBRE EL UMBRAL</span><strong id="compare-percent">—</strong><small>Porcentaje con diferencia máxima RGB &gt;20</small></div><div><span>DIMENSIONES</span><strong id="compare-dimensions">—</strong><small>Ambos archivos deben coincidir</small></div></div>
+        <p class="result-note">Este procedimiento mide diferencias entre archivos, no probabilidad de manipulación. Para un experimento válido, conservá las mismas dimensiones, registrá el método de exportación y compará con una edición conocida.</p>
+      </div>
+    </section>
+    <section id="metodos" class="method"><div><span class="section-number">07 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
     <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
   </div>
 </main>
