@@ -1,48 +1,45 @@
 # Image Forensics Lab
 
-Laboratorio educativo de análisis forense de imágenes digitales mediante procesamiento clásico y aprendizaje automático.
+Laboratorio académico de procesamiento y análisis exploratorio de imágenes digitales. Trabajo final individual · Procesamiento de Imágenes · IFTS 18.
 
-> **Estado:** estructura inicial. No existe todavía un detector entrenado ni una conclusión forense validada.
+> **Alcance científico:** la aplicación muestra características visuales y artefactos de procesamiento; no determina si una imagen es auténtica o falsa. No existe todavía un detector entrenado o validado.
 
-## Objetivo
-Investigar si características extraídas con técnicas clásicas de procesamiento de imágenes ayudan a localizar regiones manipuladas mediante Random Forest y SVM, comparados con métodos clásicos de referencia.
+## Arquitectura
+- `frontend/`: interfaz web estática (HTML, CSS, JavaScript), alojable en Vercel.
+- `backend/main.py`: API FastAPI, alojable en Render.
+- `src/image_forensics/`: procesamiento reutilizable y validación de imágenes.
+- `tests/`: pruebas automáticas.
+- `docs/`: protocolo y plan de investigación.
 
-## Alcance
-1. Generar manipulaciones controladas y máscaras de referencia.
-2. Implementar bordes, ruido, textura y mapas de diferencias por recompresión JPEG.
-3. Extraer características por región y entrenar Random Forest y SVM.
-4. Evaluar por fotografía original, con precisión, recall, F1 e IoU.
-5. Publicar una aplicación interactiva en Streamlit.
+## Funcionalidades
+- Carga JPEG/PNG, máximo 12 MB y 16 megapíxeles.
+- Detección de bordes Canny (umbrales 100/200).
+- Histogramas RGB y en escala de grises.
+- Suavizado gaussiano y filtro de mediana, más residuo visual.
+- ELA (Error Level Analysis): recompresión JPEG con calidad 90, mapa de diferencias amplificado y error medio absoluto.
 
-**Limitación:** una anomalía no prueba que una foto haya sido manipulada. Uso académico, no certificación de autenticidad.
+**Interpretación ELA:** regiones brillantes pueden corresponder a detalles, texturas, bordes, formatos previos o ediciones legítimas. No permiten concluir manipulación por sí solas. La escala de visualización varía con el máximo de diferencia de cada imagen y por ello el brillo no es directamente comparable entre fotografías.
 
-## Inicio rápido
-Python 3.11 o 3.12:
+## Ejecutar localmente
+Requiere Python >=3.11:
 
 ```bash
 python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
+# Windows PowerShell:
+.venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
 pip install -r requirements-dev.txt
 python -m pytest -q
-streamlit run app/main.py
+uvicorn backend.main:app --reload
 ```
 
-## Estructura
-- `app/`: interfaz Streamlit.
-- `src/image_forensics/`: módulos de procesamiento, manipulación, características, detección y evaluación.
-- `tests/`: pruebas automatizadas.
-- `docs/`: protocolo y roadmap.
-- `data/samples/`: imágenes de ejemplo (con licencias verificadas).
-- `models/`: espacio reservado para modelos locales.
+Servir la carpeta `frontend/` con un servidor estático (por ejemplo, desde `frontend`: `python -m http.server 5500`). Editar `frontend/config.js` para apuntar a `http://localhost:8000` durante el desarrollo local. Configurar `CORS_ORIGINS` en el backend para el origen exacto del frontend.
 
-## Reproducibilidad y seguridad
-- Separar entrenamiento, validación y prueba por fotografía original.
-- Documentar semilla, versiones, parámetros y resultados.
-- No publicar fotografías privadas, datasets, secretos ni modelos grandes.
-- Procesar imágenes de usuarios temporalmente con límites de tamaño.
+## Trabajo pendiente
+- Experimentar con textura, umbralización y morfología.
+- Preparar fotografías con modificaciones controladas y máscaras de referencia.
+- Extraer características por regiones, evaluar métodos clásicos y, si hay datos suficientes, Random Forest y SVM con división por fotografía original.
+- Registrar métricas (precisión, recall, F1, IoU), limitaciones e informe académico.
+- Validar despliegues, integración y pruebas antes de integrar a `main`.
 
-Ver [protocolo experimental](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
-
-**Proyecto final individual · Procesamiento de Imágenes · IFTS 18.**
+Ver [protocolo](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
