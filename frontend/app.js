@@ -175,6 +175,7 @@ const compareStatus = document.querySelector("#compare-status");
 const compareResults = document.querySelector("#compare-results");
 const compareRefInput = document.querySelector("#compare-reference");
 const compareCandidateInput = document.querySelector("#compare-candidate");
+const compareTruthInput = document.querySelector("#compare-ground-truth");
 
 function onCompareFileChange(input, targetId) {
   const file = input.files?.[0];
@@ -187,15 +188,17 @@ function onCompareFileChange(input, targetId) {
 }
 compareRefInput.addEventListener("change", () => onCompareFileChange(compareRefInput, "compare-reference-name"));
 compareCandidateInput.addEventListener("change", () => onCompareFileChange(compareCandidateInput, "compare-candidate-name"));
+compareTruthInput.addEventListener("change", () => onCompareFileChange(compareTruthInput, "compare-ground-truth-name"));
 
 compareForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const reference = compareRefInput.files?.[0];
   const candidate = compareCandidateInput.files?.[0];
+  const groundTruth = compareTruthInput.files?.[0];
   if (!reference || !candidate) return;
   compareResults.hidden = true;
   compareStatus.classList.remove("error");
-  if ([reference, candidate].some(file => file.size > 12 * 1024 * 1024 ||
+  if ([reference, candidate, groundTruth].filter(Boolean).some(file => file.size > 12 * 1024 * 1024 ||
       !["image/jpeg", "image/png"].includes(file.type))) {
     compareStatus.textContent = "Seleccioná dos imágenes JPG o PNG, de hasta 12 MB cada una.";
     compareStatus.classList.add("error");
@@ -207,6 +210,7 @@ compareForm.addEventListener("submit", async (event) => {
   const dataToSend = new FormData();
   dataToSend.append("reference", reference);
   dataToSend.append("candidate", candidate);
+  if (groundTruth) dataToSend.append("ground_truth", groundTruth);
   try {
     const base = (window.IMAGE_FORENSICS_API_URL || "").replace(/\/$/, "");
     const response = await fetch(base + "/api/compare", { method: "POST", body: dataToSend });
@@ -221,6 +225,22 @@ compareForm.addEventListener("submit", async (event) => {
     document.querySelector("#compare-mae").textContent = String(data.mae);
     document.querySelector("#compare-percent").textContent = data.changed_percent + " %";
     document.querySelector("#compare-dimensions").textContent = data.width + " × " + data.height;
+    const evalSection = document.querySelector("#evaluation-results");
+    if (data.evaluation) {
+      const evaluation = data.evaluation;
+      document.querySelector("#compare-truth").src = "data:image/png;base64," + data.ground_truth_png_base64;
+      document.querySelector("#compare-mask-eval").src = "data:image/png;base64," + data.mask_png_base64;
+      for (const metric of ["precision", "recall", "f1", "iou"]) {
+        document.querySelector("#metric-" + metric).textContent = (evaluation[metric] * 100).toFixed(1) + " %";
+      }
+      document.querySelector("#evaluation-counts").textContent =
+        "TP: " + evaluation.tp + " · FP: " + evaluation.fp + " · FN: " + evaluation.fn +
+        " · TN: " + evaluation.tn +
+        (evaluation.empty_case ? " · Ambas máscaras vacías: coincidencia perfecta por convención." : "");
+      evalSection.hidden = false;
+    } else {
+      evalSection.hidden = true;
+    }
     compareResults.hidden = false;
     compareStatus.textContent = "Comparación completada. Se mantienen las dimensiones originales para el cálculo.";
     compareResults.scrollIntoView({behavior: "smooth", block: "start"});
