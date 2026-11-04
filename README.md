@@ -147,3 +147,43 @@ Reemplazar la ruta por la carpeta extraída con las subcarpetas `1a1ogs`,
 `1a3oag`, etc. Para el primer ensayo usar solo 30 casos; verificar
 `warning_examples`, `ready` y la licencia del dataset antes de entrenar.
 Las rutas se resuelven relativas al CSV: no mover el CSV solo.
+
+
+## Diagnóstico por imagen y ampliación progresiva del dataset
+
+Después del ensayo inicial de 30 grupos, ampliar a **60 grupos** (no a todas las
+imágenes de golpe), usando el dataset extraído en Windows:
+
+```powershell
+.\.venv\Scripts\python.exe -m image_forensics.detection.import_imd2020 --root "C:\Users\Noxi-PC\Pictures\dataset" --max-groups 60
+.\.venv\Scripts\python.exe -m image_forensics.detection.audit_dataset --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv"
+.\.venv\Scripts\python.exe -m image_forensics.detection.train --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv" --out models/imd2020_60
+```
+
+**Importante:** el segundo importador reemplaza el CSV `manifest_imd2020.csv`,
+pero no modifica las fotos ni el modelo antiguo guardado en `models/imd2020_30`.
+Como la división train/validation/test se recalcula por grupos, **las métricas
+de 30 y 60 grupos no son una comparación controlada**: cambia el conjunto de
+prueba. Para comparar cambios de características/modelos, se debe fijar una
+partición independiente de test y conservarla idéntica entre experimentos.
+
+El entrenamiento ahora imprime el progreso de extracción cada cinco imágenes,
+avisa al entrenar cada clasificador y crea en la carpeta de salida:
+
+- `metrics.json`: métricas globales, distribución de parches por clase y split,
+  resumen de fotografías de prueba con FP/FN.
+- `test_by_image.csv`: una fila por fotografía en **test**, con grupo, ruta,
+  positivos, TP/FP/FN/TN, precisión, recall y F1 de los parches.
+- `model.joblib`: modelo experimental de origen local.
+
+Para encontrar ejemplos problemáticos, ordenar el CSV por `fp` o `fn` de mayor
+a menor. Los casos auténticos con máscara negra se incluyen en `test` para
+medir falsas alarmas. Las métricas de las imágenes sin positivos se reportan
+con `zero_division=0` y deben interpretarse según sus conteos, no como
+fallos del modelo automáticamente.
+
+Primero comprobar las pruebas:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
