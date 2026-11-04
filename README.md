@@ -16,9 +16,9 @@ Laboratorio académico de procesamiento y análisis exploratorio de imágenes di
 - Detección de bordes Canny (umbrales 100/200).
 - Histogramas RGB y en escala de grises.
 - Suavizado gaussiano y filtro de mediana, más residuo visual.
-- ELA (Error Level Analysis): recompresión JPEG con calidad 90, mapa de diferencias amplificado y error medio absoluto.
+- ELA (Error Level Analysis): recompresión JPEG con calidad 90, mapa de diferencias sin amplificar, control de contraste visual y error medio absoluto.
 
-**Interpretación ELA:** regiones brillantes pueden corresponder a detalles, texturas, bordes, formatos previos o ediciones legítimas. No permiten concluir manipulación por sí solas. La escala de visualización varía con el máximo de diferencia de cada imagen y por ello el brillo no es directamente comparable entre fotografías.
+**Interpretación ELA:** regiones brillantes pueden corresponder a detalles, texturas, bordes, formatos previos o ediciones legítimas. No permiten concluir manipulación por sí solas. El control de amplificación (×1 a ×64) permite inspeccionar el mapa sin alterar los datos ni la métrica. Para comparar imágenes hay que usar la misma calidad y la misma amplificación; aun así los mapas no son una prueba de autenticidad.
 
 ## Ejecutar localmente
 Requiere Python >=3.11:
@@ -43,3 +43,12 @@ Servir la carpeta `frontend/` con un servidor estático (por ejemplo, desde `fro
 - Validar despliegues, integración y pruebas antes de integrar a `main`.
 
 Ver [protocolo](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
+
+## Protocolo breve de prueba comparativa
+1. Elegir una imagen que podamos modificar y guardar una copia intacta.
+2. Registrar formato, dimensiones y tamaño; analizar la copia original.
+3. Modificar una región de manera controlada y exportar la versión editada con las mismas dimensiones y un procedimiento de guardado documentado.
+4. Analizar ambas con JPEG calidad 90 y el mismo factor de amplificación; anotar diferencia media y observaciones.
+5. Evitar interpretar mayor brillo como manipulación demostrada; la recompresión anterior y las texturas son variables de confusión.
+
+**Desarrollo local:** `frontend/config.js` debe apuntar a `http://127.0.0.1:8000` al usar el backend local. No subir ese cambio de configuración si el despliegue público sigue usando Render.
