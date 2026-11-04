@@ -1,4 +1,42 @@
 
+/* El control de contraste es visual: siempre parte del mapa sin amplificar. */
+let elaRawPixels = null;
+const elaSlider = document.querySelector("#ela-scale");
+function renderEla() {
+  if (!elaRawPixels) return;
+  const canvas = document.querySelector("#ela-canvas");
+  const ctx = canvas.getContext("2d");
+  const pixels = new ImageData(new Uint8ClampedArray(elaRawPixels.data), elaRawPixels.width, elaRawPixels.height);
+  const factor = Number(elaSlider.value);
+  for (let i = 0; i < pixels.data.length; i += 4) {
+    for (let channel = 0; channel < 3; channel++) {
+      pixels.data[i + channel] = Math.min(255, Math.round(elaRawPixels.data[i + channel] * factor));
+    }
+  }
+  ctx.putImageData(pixels, 0, 0);
+  document.querySelector("#ela-scale-value").textContent = "×" + factor;
+}
+elaSlider.addEventListener("input", renderEla);
+function loadElaRawMap(base64) {
+  elaRawPixels = null;
+  const image = new Image();
+  image.onload = () => {
+    const canvas = document.querySelector("#ela-canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const ctx = canvas.getContext("2d", {willReadFrequently: true});
+    ctx.drawImage(image, 0, 0);
+    elaRawPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    renderEla();
+  };
+  image.onerror = () => {
+    document.querySelector("#status").textContent = "No se pudo mostrar el mapa ELA.";
+    document.querySelector("#status").classList.add("error");
+  };
+  image.src = "data:image/png;base64," + base64;
+}
+
+
 function drawHistogram(canvasId, series) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
@@ -113,9 +151,13 @@ form.addEventListener("submit", async event => {
       filterResults.hidden = false;
     } else { filterResults.hidden = true; }
     const elaResults = document.querySelector("#ela-results");
-    if (data.ela) {
-      document.querySelector("#ela-map").src = "data:image/png;base64," + data.ela.map_png_base64;
-      document.querySelector("#ela-metric").textContent = "Diferencia media absoluta: " + data.ela.mean_absolute_error + " niveles · Escala visual ×" + data.ela.display_scale;
+    if (data.ela?.raw_map_png_base64) {
+      document.querySelector("#ela-original").src = previousObjectUrl;
+      document.querySelector("#ela-mae").textContent = String(data.ela.mean_absolute_error);
+      document.querySelector("#ela-suggested").textContent = "×" + data.ela.suggested_scale;
+      const slider = document.querySelector("#ela-scale");
+      slider.value = String(Math.max(1, Math.min(64, Math.round(data.ela.suggested_scale))));
+      loadElaRawMap(data.ela.raw_map_png_base64);
       elaResults.hidden = false;
     } else { elaResults.hidden = true; }
     results.hidden = false;
