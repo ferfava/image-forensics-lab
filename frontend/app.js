@@ -112,8 +112,14 @@ form.addEventListener("submit", async event => {
       document.querySelector("#residual-metric").textContent = "Diferencia media absoluta: " + data.filters.residual_mean + " niveles de intensidad (antes de amplificar)";
       filterResults.hidden = false;
     } else { filterResults.hidden = true; }
+    const elaResults = document.querySelector("#ela-results");
+    if (data.ela) {
+      document.querySelector("#ela-map").src = "data:image/png;base64," + data.ela.map_png_base64;
+      document.querySelector("#ela-metric").textContent = "Diferencia media absoluta: " + data.ela.mean_absolute_error + " niveles · Escala visual ×" + data.ela.display_scale;
+      elaResults.hidden = false;
+    } else { elaResults.hidden = true; }
     results.hidden = false;
-    status.textContent = "Bordes, histogramas y filtros procesados.";
+    status.textContent = "Bordes, histogramas, filtros y ELA procesados.";
     results.scrollIntoView({behavior:"smooth",block:"start"});
   } catch (error) {
     status.textContent = "No se pudo completar el análisis. " + error.message;
