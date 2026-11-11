@@ -13,7 +13,13 @@ def infer_image(rgb: np.ndarray, artifact: dict):
     if tuple(artifact["feature_names"]) != FEATURE_NAMES:
         raise ValueError("Esquema de características incompatible.")
     features, boxes, shape = patch_features(rgb, artifact["patch_size"])
-    labels = artifact["estimator"].predict(features)
+    estimator = artifact["estimator"]
+    if "threshold" in artifact:
+        if not hasattr(estimator, "decision_function"):
+            raise ValueError("El modelo calibrado debe ofrecer decision_function.")
+        labels = estimator.decision_function(features) >= float(artifact["threshold"])
+    else:
+        labels = estimator.predict(features)
     return patch_map(labels, boxes, shape)
 
 
