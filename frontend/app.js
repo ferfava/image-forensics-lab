@@ -264,3 +264,28 @@ for (const link of document.querySelectorAll('.sidebar a[data-needs-analysis="tr
     message.textContent = "Primero seleccioná una fotografía y ejecutá el análisis para ver esta técnica.";
   });
 }
+
+
+/* Indicar qué sección seleccionó la persona: navegación real, sin "ACTIVO" fijo. */
+const menuLinks = Array.from(document.querySelectorAll('.sidebar nav a[href^="#"]'));
+function markCurrentSection(hash) {
+  for (const link of menuLinks) {
+    const active = link.getAttribute("href") === hash;
+    if (active) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+    link.classList.toggle("selected", active && link.classList.contains("nav-link"));
+  }
+}
+for (const link of menuLinks) {
+  link.addEventListener("click", () => {
+    const unavailable = link.dataset.needsAnalysis === "true" &&
+      document.querySelector("#results").hidden;
+    markCurrentSection(unavailable ? "#laboratorio" : link.getAttribute("href"));
+  });
+}
+window.addEventListener("hashchange", () => {
+  const hash = location.hash;
+  if (menuLinks.some(link => link.getAttribute("href") === hash)) markCurrentSection(hash);
+});
+markCurrentSection(menuLinks.some(link => link.getAttribute("href") === location.hash)
+  ? location.hash : "#laboratorio");
