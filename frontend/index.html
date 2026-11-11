@@ -31,6 +31,28 @@
   <div class="content">
     <div class="headline"><span class="overline"><span class="pulse"></span> DIGITAL IMAGE FORENSICS · RESEARCH LAB</span><h1>La imagen cuenta una historia.<br><em>Los píxeles, otra.</em></h1><p>Explorá las señales visuales de una fotografía mediante técnicas clásicas de procesamiento digital. Observá, compará y sacá tus propias conclusiones.</p></div>
     <div class="info-strip"><span class="info-symbol">ⓘ</span><div><strong>Análisis exploratorio, no veredicto.</strong> Los mapas generados muestran características visuales y no certifican si una fotografía fue manipulada.</div></div>
+    <section id="ejemplos" class="samples-section" aria-labelledby="samples-heading">
+      <div class="samples-heading"><div><span class="samples-eyebrow">PRUEBAS GUIADAS</span><h2 id="samples-heading">Probá el laboratorio con ejemplos listos</h2></div><span class="samples-counter">3 CASOS CONTROLADOS</span></div>
+      <p class="result-note">Escenas sintéticas creadas para practicar, no fotografías reales ni parte del entrenamiento. Cada caso incluye referencia, edición y máscara independiente de la edición. Para ML sirven para estudiar predicciones y errores, <strong>no para validar su precisión</strong>.</p>
+      <div class="sample-grid" id="sample-grid">
+        <article class="sample-card" data-sample="costa">
+          <canvas class="sample-preview" width="384" height="256" role="img" aria-label="Vista previa de paisaje costero sintético con cartel agregado"></canvas>
+          <div class="sample-content"><span class="sample-kicker">CASO 01 · INSERCIÓN</span><h3>Faro y señal</h3><p>Se agrega una señal a un paisaje costero. Comparación con región editada conocida.</p>
+          <div class="sample-actions"><button type="button" class="sample-action" data-sample-action="compare">Probar comparación</button><button type="button" class="sample-action secondary" data-sample-action="analyze">Analizar imagen</button><button type="button" class="sample-action secondary" data-sample-action="ml">Probar SVM</button></div></div>
+        </article>
+        <article class="sample-card" data-sample="escritorio">
+          <canvas class="sample-preview" width="384" height="256" role="img" aria-label="Vista previa de escritorio sintético con nota agregada"></canvas>
+          <div class="sample-content"><span class="sample-kicker">CASO 02 · OBJETO AGREGADO</span><h3>Escritorio y nota</h3><p>Una nota aparece en una escena de oficina. El área de intervención está delimitada.</p>
+          <div class="sample-actions"><button type="button" class="sample-action" data-sample-action="compare">Probar comparación</button><button type="button" class="sample-action secondary" data-sample-action="analyze">Analizar imagen</button><button type="button" class="sample-action secondary" data-sample-action="ml">Probar SVM</button></div></div>
+        </article>
+        <article class="sample-card" data-sample="ciudad">
+          <canvas class="sample-preview" width="384" height="256" role="img" aria-label="Vista previa de calle nocturna sintética con cartel agregado"></canvas>
+          <div class="sample-content"><span class="sample-kicker">CASO 03 · CAMBIO CONTROLADO</span><h3>Calle nocturna</h3><p>Se incorpora un cartel luminoso en una fachada. Permite explorar texturas y bordes.</p>
+          <div class="sample-actions"><button type="button" class="sample-action" data-sample-action="compare">Probar comparación</button><button type="button" class="sample-action secondary" data-sample-action="analyze">Analizar imagen</button><button type="button" class="sample-action secondary" data-sample-action="ml">Probar SVM</button></div></div>
+        </article>
+      </div>
+      <p id="sample-status" class="status" role="status" aria-live="polite"></p>
+    </section>
     <div id="cargar" class="section-heading"><div><span class="section-number">01 /</span><h2>Cargar imagen</h2></div><span class="section-aside">FORMATOS JPG · PNG &nbsp; | &nbsp; MÁX. 12 MB</span></div>
     <form id="analyze-form">
       <label class="dropzone" id="dropzone" for="photo" tabindex="0">
@@ -126,6 +148,6 @@
   </div>
 </main>
 </div>
-<script src="./config.js"></script><script src="./app.js"></script><script src="./ml.js"></script>
+<script src="./config.js"></script><script src="./app.js"></script><script src="./ml.js"></script><script src="./samples.js"></script>
 </body>
 </html>
