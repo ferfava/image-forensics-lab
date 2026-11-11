@@ -67,3 +67,41 @@
  .sidebar .tech b{display:none}
  .sidebar-bottom{display:none}
 }
+
+
+/* Navegación final: enlaces claramente interactivos, no etiquetas de estado. */
+.sidebar .tech-navigation{gap:5px}
+.sidebar .tech-navigation a.tech{
+  display:flex;align-items:center;gap:11px;white-space:normal;margin:0;
+  border:1px solid transparent;border-radius:10px;padding:11px 12px;
+  color:#b6c8de;background:transparent;font-size:12px;line-height:1.3;
+  min-height:46px;
+}
+.sidebar .tech-navigation a.tech:hover{
+  background:#192b43;border-color:#344e6c;color:#fff;
+}
+.sidebar .tech-navigation a.tech[aria-current="location"]{
+  background:#17344b;border-color:#40718b;color:#f1fcff;
+  box-shadow:inset 3px 0 0 var(--cyan);
+}
+.sidebar .tech-number{
+  display:grid;place-items:center;width:27px;height:27px;flex:0 0 27px;
+  background:#192b40;border:1px solid #34455f;border-radius:7px;
+  font:700 10px 'Space Grotesk',sans-serif;color:#82cde4;
+}
+.sidebar .tech-name{flex:1;min-width:0}
+.sidebar .tech-arrow{margin-left:auto;font-size:23px;line-height:1;color:#78a6bf;flex:0 0 auto}
+.sidebar .research-note{
+  margin:1px 5px 12px;padding:13px 12px;border:1px dashed #34445b;
+  border-radius:10px;background:#101c2b;
+}
+.sidebar .research-note-title{font-weight:700;font-size:12px;color:#b7c9dc}
+.sidebar .research-note small{display:block;margin-top:5px;font-size:10px;line-height:1.6;color:#8294ab}
+.sidebar nav .nav-link[aria-current="location"]{
+  background:#18283f;color:#e1f6ff;border:1px solid #3a647e;
+}
+@media(max-width:850px){
+ .sidebar .tech-navigation a.tech{min-height:39px;flex:0 0 auto;padding:7px 10px}
+ .sidebar .tech-arrow{display:none}
+ .sidebar .research-note{display:none}
+}
