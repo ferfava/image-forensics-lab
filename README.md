@@ -4,6 +4,16 @@ Laboratorio académico de procesamiento y análisis exploratorio de imágenes di
 
 > **Alcance científico:** la aplicación muestra características visuales y artefactos de procesamiento; no determina si una imagen es auténtica o falsa. Existen clasificadores experimentales entrenados localmente, pero ninguno está validado ni publicado como detector de autenticidad.
 
+## Entrega académica (noviembre de 2026)
+
+- [Informe técnico y resultados experimentales](docs/informe_final.md).
+- [Guion de demostración y defensa oral](docs/guion_defensa.md).
+- [Lista de verificaciones pendientes antes de entregar](docs/roadmap.md).
+- [Aplicación web](https://image-forensics-lab-frontend.vercel.app/).
+
+**Importante:** la aplicación web demuestra procesamiento clásico y comparación
+controlada; las pruebas ML locales no constituyen un detector forense validado.
+
 ## Arquitectura
 - `frontend/`: interfaz web estática (HTML, CSS, JavaScript), alojable en Vercel.
 - `backend/main.py`: API FastAPI, alojable en Render.
