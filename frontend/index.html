@@ -11,13 +11,20 @@
 <aside class="sidebar" aria-label="Navegación del laboratorio">
   <a class="brand" href="./"><span class="brand-icon">⌬</span><span>IMAGE<span class="brand-light">FORENSICS</span><small>LABORATORY / IFTS 18</small></span></a>
   <div class="nav-label">ESPACIO DE TRABAJO</div>
-  <nav><a href="#laboratorio" class="nav-link selected"><span>▣</span> Laboratorio <span class="nav-dot"></span></a><a href="#metodos" class="nav-link"><span>◈</span> Metodología</a></nav>
-  <div class="nav-label">TÉCNICAS</div>
-  <div class="tech selected-tech"><span class="tech-dot active"></span> Detección de bordes <b>ACTIVO</b></div>
-  <div class="tech selected-tech"><span class="tech-dot active"></span> Histogramas <b>ACTIVO</b></div>
-  <div class="tech selected-tech"><span class="tech-dot active"></span> Filtrado y ruido <b>ACTIVO</b></div>
-  <div class="tech selected-tech"><span class="tech-dot active"></span> Recompresión JPEG <b>ACTIVO</b></div>
-  <div class="tech"><span class="tech-dot"></span> Machine Learning <span>PRÓX.</span></div>
+  <nav aria-label="Secciones principales">
+    <a href="#laboratorio" class="nav-link selected"><span>▣</span> Laboratorio <span class="nav-dot"></span></a>
+    <a href="#comparador" class="nav-link"><span>⇄</span> Comparar imágenes</a>
+    <a href="#metodos" class="nav-link"><span>◈</span> Metodología</a>
+  </nav>
+  <div class="nav-label">TÉCNICAS DE ANÁLISIS</div>
+  <nav aria-label="Resultados y técnicas">
+    <a href="#bordes" class="tech selected-tech" data-needs-analysis="true"><span class="tech-dot active"></span> Detección de bordes <b>ACTIVO</b></a>
+    <a href="#histogramas" class="tech selected-tech" data-needs-analysis="true"><span class="tech-dot active"></span> Histogramas <b>ACTIVO</b></a>
+    <a href="#filtrado" class="tech selected-tech" data-needs-analysis="true"><span class="tech-dot active"></span> Filtrado y ruido <b>ACTIVO</b></a>
+    <a href="#ela" class="tech selected-tech" data-needs-analysis="true"><span class="tech-dot active"></span> Análisis ELA / JPEG <b>ACTIVO</b></a>
+  </nav>
+  <div class="nav-label">INVESTIGACIÓN</div>
+  <div class="tech" aria-label="Machine Learning experimental, no disponible en la web"><span class="tech-dot"></span> Machine Learning <span>EXPERIM.</span></div>
   <div class="sidebar-bottom"><span class="status-light"></span> PROTOTIPO ACADÉMICO <small>Versión 0.1 · Investigación en desarrollo</small></div>
 </aside>
 <main id="laboratorio">
@@ -36,23 +43,23 @@
     </form>
     <p id="status" class="status" role="status" aria-live="polite"></p>
     <section id="results" hidden>
-      <div class="section-heading results-title"><div><span class="section-number">02 /</span><h2>Resultados del análisis</h2></div><span id="dimensions" class="section-aside"></span></div>
+      <div id="bordes" class="section-heading results-title"><div><span class="section-number">02 /</span><h2>Resultados del análisis</h2></div><span id="dimensions" class="section-aside"></span></div>
       <div class="gallery"><figure><div class="figure-top"><span class="figure-dot"></span> ORIGINAL <span class="figure-tag">INPUT</span></div><div class="image-stage"><img id="original" alt="Fotografía original cargada"></div><figcaption>Fotografía de referencia</figcaption></figure><figure><div class="figure-top"><span class="figure-dot cyan"></span> MAPA DE BORDES <span class="figure-tag">OUTPUT</span></div><div class="image-stage"><img id="edges" alt="Mapa de bordes obtenido con Canny"></div><figcaption>Resultado del algoritmo Canny</figcaption></figure></div>
       <p class="result-note">Este mapa resalta transiciones de intensidad; por sí solo no identifica alteraciones digitales.</p>
-      <div class="section-heading hist-title"><div><span class="section-number">03 /</span><h2>Histogramas de intensidad</h2></div><span class="section-aside">256 NIVELES · 0 A 255</span></div>
+      <div id="histogramas" class="section-heading hist-title"><div><span class="section-number">03 /</span><h2>Histogramas de intensidad</h2></div><span class="section-aside">256 NIVELES · 0 A 255</span></div>
       <p class="result-note">Cada curva muestra cuántos píxeles tienen una determinada intensidad. Los histogramas describen la distribución tonal, pero no prueban una manipulación.</p>
       <div class="hist-grid">
         <section class="hist-panel"><h3>Canales RGB <span>ROJO · VERDE · AZUL</span></h3><canvas id="rgb-hist" role="img" aria-label="Gráfico de los histogramas rojo verde y azul" width="900" height="300"></canvas></section>
         <section class="hist-panel"><h3>Escala de grises <span>LUMINOSIDAD</span></h3><canvas id="gray-hist" role="img" aria-label="Gráfico del histograma de intensidades de grises" width="900" height="300"></canvas></section>
       </div>
-      <div class="section-heading"><div><span class="section-number">04 /</span><h2>Filtrado y diferencias</h2></div><span class="section-aside">GAUSSIANO · MEDIANA · RESIDUO</span></div>
+      <div id="filtrado" class="section-heading"><div><span class="section-number">04 /</span><h2>Filtrado y diferencias</h2></div><span class="section-aside">GAUSSIANO · MEDIANA · RESIDUO</span></div>
       <p class="result-note">El filtro gaussiano suaviza variaciones; la mediana reduce impulsos. El residuo es la diferencia absoluta entre original y suavizada (amplificada ×4 para su visualización), no una medida exclusiva de ruido ni una prueba de edición.</p>
       <div id="filter-results" class="filter-grid" hidden>
         <figure><div class="figure-top">FILTRO GAUSSIANO <span class="figure-tag">5 × 5</span></div><div class="image-stage"><img id="gaussian" alt="Imagen suavizada con filtro gaussiano"></div><figcaption>Suavizado gaussiano de la imagen RGB</figcaption></figure>
         <figure><div class="figure-top">FILTRO MEDIANA <span class="figure-tag">5 × 5</span></div><div class="image-stage"><img id="median" alt="Imagen filtrada mediante mediana"></div><figcaption>Filtrado de mediana de la imagen RGB</figcaption></figure>
         <figure><div class="figure-top">MAPA DE DIFERENCIAS <span class="figure-tag">×4</span></div><div class="image-stage"><img id="residual" alt="Diferencia entre original y gaussiano, amplificada"></div><figcaption id="residual-metric">Residuo visual de alta frecuencia</figcaption></figure>
       </div>
-      <div class="section-heading"><div><span class="section-number">05 /</span><h2>Análisis de recompresión JPEG · ELA</h2></div><span class="section-aside">JPEG CALIDAD 90</span></div>
+      <div id="ela" class="section-heading"><div><span class="section-number">05 /</span><h2>Análisis de recompresión JPEG · ELA</h2></div><span class="section-aside">JPEG CALIDAD 90</span></div>
       <p class="result-note">ELA compara la imagen con una versión recomprimida en JPEG. El contraste se amplifica para visualizar diferencias; estas pueden originarse en textura, bordes, formato previo o procesamiento legítimo. No demuestra manipulación.</p>
       <div id="ela-results" hidden>
         <div class="ela-controls">
