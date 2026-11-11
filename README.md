@@ -187,3 +187,47 @@ Primero comprobar las pruebas:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
+
+
+## Etapa ML: calibración exploratoria y visualización de errores
+
+A partir del dataset IMD2020 auditado con **60 grupos**:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m image_forensics.detection.calibrate --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv" --out models/imd2020_60_calibrated
+```
+
+El proceso vuelve a extraer características y **entrena un SVM nuevo**. No se
+sobrescribe el resultado anterior `models/imd2020_60`. Muestra progreso cada
+cinco imágenes.
+
+Resultados en `models/imd2020_60_calibrated/`:
+
+- `split.json`: asignación fija de grupos train/validation/test y SHA256 del
+  manifiesto. Rechaza reutilizar la partición si el CSV cambia.
+- `calibration_report.json`: criterio **F0.5** elegido de antemano para dar
+  más importancia a precisión que a recall, umbral calibrado *solo con
+  validación*, distribución y tres comparadores en el mismo test (clasificar
+  todo normal, SVM umbral 0, SVM calibrado).
+- `test_by_image_calibrated.csv`: errores por fotografía de test.
+- `error_maps/*.png`: cuatro fotografías de test con mayores falsos
+  positivos, a la izquierda imagen, a la derecha superposición: **verde TP,
+  rojo FP, azul FN** (por píxel a partir de bloques de 32; no es
+  segmentación de precisión fina).
+- `calibrated_model.joblib`: modelo que la inferencia local puede usar.
+
+Ejemplo de análisis de una sola imagen (sin imagen original):
+```powershell
+.\.venv\Scripts\python.exe -m image_forensics.detection.infer --model models/imd2020_60_calibrated/calibrated_model.joblib --image "C:\RUTA\imagen.jpg" --out outputs/ml_suspect_mask.png
+```
+
+**Nota científica esencial:** los datos de test de IMD2020_60 ya se analizaron
+en experimentos previos, por lo que **NO SON un test final intocado**.
+La calibración usa únicamente validación, pero el análisis completo todavía
+es exploratorio. Antes de publicar afirmaciones de rendimiento o desplegar un
+detector se necesitará reservar nuevas fotografías no consultadas, fijar una
+partición de evaluación final y estimar incertidumbre. Un mejor F0.5 puede
+reducir falsos positivos y también reducir el recall: comparar ambos conteos.
+
+El modelo no determina si una fotografía es auténtica o falsa.
