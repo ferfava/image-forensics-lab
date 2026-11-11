@@ -45,3 +45,25 @@
 .evaluation-metrics span{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#91a8c0}
 .evaluation-metrics strong{display:block;font-size:25px;font-variant-numeric:tabular-nums;color:#e5f4ff;margin-top:8px}
 @media(max-width:760px){.evaluation-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Navegación funcional: foco accesible, feedback y secciones visibles. */
+.sidebar{overflow-y:auto;scrollbar-width:thin}
+.sidebar nav{display:flex;flex-direction:column}
+.sidebar .nav-link,.sidebar .tech{transition:background .18s,color .18s,border-color .18s}
+.sidebar a.nav-link:hover,.sidebar a.tech:hover{background:#17283b;color:#effaff}
+.sidebar a.nav-link:focus-visible,.sidebar a.tech:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.sidebar a.tech{cursor:pointer}
+.sidebar .nav-label{flex-shrink:0}
+#bordes,#histogramas,#filtrado,#ela,#comparador,#metodos,#laboratorio{scroll-margin-top:28px}
+/* Mostrar navegación también en teléfonos; antes desaparecía por completo. */
+@media(max-width:850px){
+ .sidebar{overflow:visible}
+ .sidebar .nav-label{display:block;margin-top:12px;padding-left:0}
+ .sidebar nav{display:flex;flex-direction:row;gap:6px;overflow-x:auto;padding-bottom:5px}
+ .sidebar nav a{flex:0 0 auto;margin:0}
+ .sidebar nav .nav-link,.sidebar nav .tech{font-size:12px;padding:9px 11px}
+ .sidebar .tech{display:flex}
+ .sidebar .tech b{display:none}
+ .sidebar-bottom{display:none}
+}
