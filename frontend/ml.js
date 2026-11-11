@@ -6,32 +6,38 @@ const mlStatus = document.querySelector("#ml-status");
 const mlResults = document.querySelector("#ml-results");
 const mlPhoto = document.querySelector("#ml-photo");
 const mlBase = (window.IMAGE_FORENSICS_API_URL || "").replace(/\/$/, "");
+let mlAvailable = false;
+let mlBusy = false;
 
 async function checkMlAvailability() {
   mlButton.disabled = true;
+  mlAvailable = false;
   mlAvailability.textContent = "Comprobando si el modelo está instalado…";
   try {
     const response = await fetch(mlBase + "/api/ml/status");
     if (!response.ok) throw new Error("Estado ML no disponible.");
     const status = await response.json();
     if (status.available === true) {
+      mlAvailable = true;
       mlAvailability.textContent = "Modelo " + status.model +
         " instalado · Modo exclusivamente experimental, no validado.";
-      mlButton.disabled = false;
+      mlButton.disabled = mlBusy;
     } else {
       mlAvailability.textContent = "Módulo ML no habilitado en este servidor. " +
         (status.reason || "El modelo debe instalarse de forma segura.");
     }
   } catch (error) {
+    mlAvailable = false;
     mlAvailability.textContent = "No se pudo verificar la disponibilidad del ML. " +
       "El laboratorio clásico sigue funcionando.";
   }
+  return mlAvailable;
 }
 
 mlForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const file = mlPhoto.files?.[0];
-  if (!file || mlButton.disabled) return;
+  if (!file || !mlAvailable || mlBusy) return;
   mlResults.hidden = true;
   mlStatus.classList.remove("error");
   if (!["image/jpeg", "image/png"].includes(file.type) || file.size > 12 * 1024 * 1024) {
@@ -39,6 +45,7 @@ mlForm.addEventListener("submit", async (event) => {
     mlStatus.classList.add("error");
     return;
   }
+  mlBusy = true;
   mlButton.disabled = true;
   mlStatus.textContent = "Extrayendo características y clasificando parches…";
   try {
@@ -62,7 +69,30 @@ mlForm.addEventListener("submit", async (event) => {
     mlStatus.textContent = "No se pudo ejecutar el modelo: " + error.message;
     mlStatus.classList.add("error");
   } finally {
-    mlButton.disabled = false;
+    mlBusy = false;
+    mlButton.disabled = !mlAvailable;
   }
 });
+
+/* Ejemplos guiados esperan la verificación real del backend antes de enviar. */
+window.imageForensicsML = {
+  async runSample(file) {
+    mlResults.hidden = true;
+    mlStatus.classList.remove("error");
+    mlPhoto.files = (() => {
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      return transfer.files;
+    })();
+    const available = await checkMlAvailability();
+    if (!available) {
+      mlStatus.textContent = "El ejemplo quedó cargado, pero el SVM no está instalado en este servidor. " +
+        "Para ejecutar la predicción, utilizá el frontend local conectado al backend con el modelo V1.";
+      mlStatus.classList.add("error");
+      return false;
+    }
+    mlForm.requestSubmit();
+    return true;
+  }
+};
 checkMlAvailability();
