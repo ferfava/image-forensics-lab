@@ -105,3 +105,17 @@
  .sidebar .tech-arrow{display:none}
  .sidebar .research-note{display:none}
 }
+
+
+/* Índice académico único: numeración idéntica a los títulos 01–07. */
+#cargar{scroll-margin-top:24px}
+.sidebar .tech-navigation{margin-bottom:14px}
+.sidebar .tech-navigation a.tech{min-height:43px}
+.sidebar .tech-navigation a.tech[aria-current="location"] .tech-number{
+ background:#275270;color:#dffaff;border-color:#5299aa;
+}
+.sidebar .tech-navigation a.tech[aria-current="location"] .tech-arrow{color:#84f0f3}
+@media(max-width:850px){
+  .sidebar .tech-navigation{flex-wrap:wrap;overflow:visible}
+  .sidebar .tech-navigation a.tech{min-height:38px;flex:0 1 auto}
+}
