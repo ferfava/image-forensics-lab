@@ -231,3 +231,37 @@ partición de evaluación final y estimar incertidumbre. Un mejor F0.5 puede
 reducir falsos positivos y también reducir el recall: comparar ambos conteos.
 
 El modelo no determina si una fotografía es auténtica o falsa.
+
+
+## Experimento V2: textura LBP y comparación local
+
+Se conserva la **V1 de 8 características** y se agrega V2 con **14
+características**. Las seis nuevas incluyen dos estadísticas de Local Binary
+Patterns (uniformidad energética y entropía) y cuatro contrastes contra
+los parches vecinos de la misma foto (media de grises, desviación de grises,
+residuo JPEG y entropía LBP). La comparación es espacial y no requiere
+imagen original durante inferencia.
+
+**La única comparación controlada aceptada** debe usar el split bloqueado de
+la calibración anterior; si falta `split.json`, el script no inventa uno.
+
+```powershell
+git pull --ff-only origin feature/jpeg-ela-analysis
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m image_forensics.detection.compare_v2 --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv" --split models/imd2020_60_calibrated/split.json --out models/imd2020_v1_v2
+```
+
+El entrenamiento V1 y V2 puede consumir CPU por la SVM; muestra progreso
+de extracción cada cinco fotos y después el resultado de ambos modelos.
+Produce `models/imd2020_v1_v2/comparison_v1_v2.json`,
+`v1_model.joblib` y `v2_model.joblib` sin sobrescribir resultados previos.
+Para inferencia local en una sola fotografía también funciona el artefacto
+V2 con `image_forensics.detection.infer`.
+
+Ambos SVM usan los mismos hiperparámetros y seleccionan su umbral en
+**validación** optimizando F0.5. La comparación emplea idéntico
+conjunto de prueba y etiquetas por parche. No se selecciona un modelo final
+mirando el resultado de test. **Los grupos de prueba ya fueron revisados en
+ensayos anteriores**: este resultado es exploratorio y será necesario
+reservar un conjunto nuevo nunca visto para el informe de generalización.
+El script no afirma que V2 vaya a mejorar los indicadores.
