@@ -1,4 +1,42 @@
 
+/* El control de contraste es visual: siempre parte del mapa sin amplificar. */
+let elaRawPixels = null;
+const elaSlider = document.querySelector("#ela-scale");
+function renderEla() {
+  if (!elaRawPixels) return;
+  const canvas = document.querySelector("#ela-canvas");
+  const ctx = canvas.getContext("2d");
+  const pixels = new ImageData(new Uint8ClampedArray(elaRawPixels.data), elaRawPixels.width, elaRawPixels.height);
+  const factor = Number(elaSlider.value);
+  for (let i = 0; i < pixels.data.length; i += 4) {
+    for (let channel = 0; channel < 3; channel++) {
+      pixels.data[i + channel] = Math.min(255, Math.round(elaRawPixels.data[i + channel] * factor));
+    }
+  }
+  ctx.putImageData(pixels, 0, 0);
+  document.querySelector("#ela-scale-value").textContent = "×" + factor;
+}
+elaSlider.addEventListener("input", renderEla);
+function loadElaRawMap(base64) {
+  elaRawPixels = null;
+  const image = new Image();
+  image.onload = () => {
+    const canvas = document.querySelector("#ela-canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const ctx = canvas.getContext("2d", {willReadFrequently: true});
+    ctx.drawImage(image, 0, 0);
+    elaRawPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    renderEla();
+  };
+  image.onerror = () => {
+    document.querySelector("#status").textContent = "No se pudo mostrar el mapa ELA.";
+    document.querySelector("#status").classList.add("error");
+  };
+  image.src = "data:image/png;base64," + base64;
+}
+
+
 function drawHistogram(canvasId, series) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
@@ -112,11 +150,104 @@ form.addEventListener("submit", async event => {
       document.querySelector("#residual-metric").textContent = "Diferencia media absoluta: " + data.filters.residual_mean + " niveles de intensidad (antes de amplificar)";
       filterResults.hidden = false;
     } else { filterResults.hidden = true; }
+    const elaResults = document.querySelector("#ela-results");
+    if (data.ela?.raw_map_png_base64) {
+      document.querySelector("#ela-original").src = previousObjectUrl;
+      document.querySelector("#ela-mae").textContent = String(data.ela.mean_absolute_error);
+      document.querySelector("#ela-suggested").textContent = "×" + data.ela.suggested_scale;
+      const slider = document.querySelector("#ela-scale");
+      slider.value = String(Math.max(1, Math.min(64, Math.round(data.ela.suggested_scale))));
+      loadElaRawMap(data.ela.raw_map_png_base64);
+      elaResults.hidden = false;
+    } else { elaResults.hidden = true; }
     results.hidden = false;
-    status.textContent = "Bordes, histogramas y filtros procesados.";
+    status.textContent = "Bordes, histogramas, filtros y ELA procesados.";
     results.scrollIntoView({behavior:"smooth",block:"start"});
   } catch (error) {
     status.textContent = "No se pudo completar el análisis. " + error.message;
     status.classList.add("error");
   } finally { button.disabled = false; }
+});
+
+/* Comparación experimental: dos entradas independientes del análisis individual. */
+const compareForm = document.querySelector("#compare-form");
+const compareStatus = document.querySelector("#compare-status");
+const compareResults = document.querySelector("#compare-results");
+const compareRefInput = document.querySelector("#compare-reference");
+const compareCandidateInput = document.querySelector("#compare-candidate");
+const compareTruthInput = document.querySelector("#compare-ground-truth");
+
+function onCompareFileChange(input, targetId) {
+  const file = input.files?.[0];
+  document.getElementById(targetId).textContent = file
+    ? file.name + " · " + (file.size / 1048576).toFixed(2) + " MB"
+    : "JPG o PNG · hasta 12 MB";
+  compareResults.hidden = true;
+  compareStatus.textContent = "";
+  compareStatus.classList.remove("error");
+}
+compareRefInput.addEventListener("change", () => onCompareFileChange(compareRefInput, "compare-reference-name"));
+compareCandidateInput.addEventListener("change", () => onCompareFileChange(compareCandidateInput, "compare-candidate-name"));
+compareTruthInput.addEventListener("change", () => onCompareFileChange(compareTruthInput, "compare-ground-truth-name"));
+
+compareForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const reference = compareRefInput.files?.[0];
+  const candidate = compareCandidateInput.files?.[0];
+  const groundTruth = compareTruthInput.files?.[0];
+  if (!reference || !candidate) return;
+  compareResults.hidden = true;
+  compareStatus.classList.remove("error");
+  if ([reference, candidate, groundTruth].filter(Boolean).some(file => file.size > 12 * 1024 * 1024 ||
+      !["image/jpeg", "image/png"].includes(file.type))) {
+    compareStatus.textContent = "Seleccioná dos imágenes JPG o PNG, de hasta 12 MB cada una.";
+    compareStatus.classList.add("error");
+    return;
+  }
+  const button = document.querySelector("#compare-button");
+  button.disabled = true;
+  compareStatus.textContent = "Comparando imágenes en el servidor...";
+  const dataToSend = new FormData();
+  dataToSend.append("reference", reference);
+  dataToSend.append("candidate", candidate);
+  if (groundTruth) dataToSend.append("ground_truth", groundTruth);
+  try {
+    const base = (window.IMAGE_FORENSICS_API_URL || "").replace(/\/$/, "");
+    const response = await fetch(base + "/api/compare", { method: "POST", body: dataToSend });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(typeof data.detail === "string" ? data.detail : "No se pudo realizar la comparación.");
+    }
+    document.querySelector("#compare-original").src = "data:image/png;base64," + data.reference_png_base64;
+    document.querySelector("#compare-edited").src = "data:image/png;base64," + data.candidate_png_base64;
+    document.querySelector("#compare-diff").src = "data:image/png;base64," + data.difference_png_base64;
+    document.querySelector("#compare-mask").src = "data:image/png;base64," + data.mask_png_base64;
+    document.querySelector("#compare-mae").textContent = String(data.mae);
+    document.querySelector("#compare-percent").textContent = data.changed_percent + " %";
+    document.querySelector("#compare-dimensions").textContent = data.width + " × " + data.height;
+    const evalSection = document.querySelector("#evaluation-results");
+    if (data.evaluation) {
+      const evaluation = data.evaluation;
+      document.querySelector("#compare-truth").src = "data:image/png;base64," + data.ground_truth_png_base64;
+      document.querySelector("#compare-mask-eval").src = "data:image/png;base64," + data.mask_png_base64;
+      for (const metric of ["precision", "recall", "f1", "iou"]) {
+        document.querySelector("#metric-" + metric).textContent = (evaluation[metric] * 100).toFixed(1) + " %";
+      }
+      document.querySelector("#evaluation-counts").textContent =
+        "TP: " + evaluation.tp + " · FP: " + evaluation.fp + " · FN: " + evaluation.fn +
+        " · TN: " + evaluation.tn +
+        (evaluation.empty_case ? " · Ambas máscaras vacías: coincidencia perfecta por convención." : "");
+      evalSection.hidden = false;
+    } else {
+      evalSection.hidden = true;
+    }
+    compareResults.hidden = false;
+    compareStatus.textContent = "Comparación completada. Se mantienen las dimensiones originales para el cálculo.";
+    compareResults.scrollIntoView({behavior: "smooth", block: "start"});
+  } catch (error) {
+    compareStatus.textContent = "No se pudo completar la comparación. " + error.message;
+    compareStatus.classList.add("error");
+  } finally {
+    button.disabled = false;
+  }
 });

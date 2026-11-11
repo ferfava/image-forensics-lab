@@ -11,11 +11,14 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from image_forensics.preprocessing.image_io import decode_rgb, MAX_UPLOAD_BYTES  # noqa: E402
+from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
+from image_forensics.processing.comparison import compare_rgb  # noqa: E402
+from image_forensics.evaluation.segmentation import evaluate_mask  # noqa: E402
 
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
 import os
-origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500").split(",") if s.strip()]
+origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,https://image-forensics-lab-frontend.vercel.app").split(",") if s.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
@@ -48,6 +51,7 @@ async def analyze(file: UploadFile = File(...)):
     residual = cv2.absdiff(rgb, gaussian)
     # La visualización del residuo se amplifica para que pueda inspeccionarse.
     residual_view = cv2.convertScaleAbs(residual, alpha=4.0)
+    ela_raw, ela_mean, ela_scale = compute_ela_raw(rgb, quality=90)
 
     def preview_png(array):
         height, width = array.shape[:2]
@@ -66,6 +70,75 @@ async def analyze(file: UploadFile = File(...)):
         "method": "Canny (umbrales 100 y 200)",
         "histograms": histograms,
         "filters": {"gaussian_png_base64": preview_png(gaussian), "median_png_base64": preview_png(median), "residual_png_base64": preview_png(residual_view), "residual_mean": round(float(residual.mean()), 3)},
+        "ela": {"raw_map_png_base64": preview_png(ela_raw), "quality": 90, "mean_absolute_error": ela_mean, "suggested_scale": ela_scale},
         "edge_map_png_base64": base64.b64encode(output.getvalue()).decode("ascii"),
         "disclaimer": "Los bordes no demuestran una manipulación de la imagen.",
+    }
+
+
+@app.post("/api/compare")
+async def compare_images(
+    reference: UploadFile = File(...),
+    candidate: UploadFile = File(...),
+    ground_truth: UploadFile | None = File(None),
+):
+    """Comparación controlada de dos imágenes, sin guardar archivos."""
+    reference_bytes = await reference.read(MAX_UPLOAD_BYTES + 1)
+    candidate_bytes = await candidate.read(MAX_UPLOAD_BYTES + 1)
+    ground_truth_bytes = await ground_truth.read(MAX_UPLOAD_BYTES + 1) if ground_truth else None
+    try:
+        ref_rgb = decode_rgb(reference_bytes)
+        candidate_rgb = decode_rgb(candidate_bytes)
+        if ref_rgb.shape != candidate_rgb.shape:
+            raise HTTPException(
+                status_code=400,
+                detail="Las dos imágenes deben tener exactamente las mismas dimensiones. "
+                       "No se realiza redimensionamiento ni alineación automática.",
+            )
+        diff, mask, mae, changed = compare_rgb(ref_rgb, candidate_rgb, threshold=20)
+        gt_mask = None
+        metrics = None
+        if ground_truth_bytes is not None:
+            gt_rgb = decode_rgb(ground_truth_bytes)
+            if gt_rgb.shape != ref_rgb.shape:
+                raise HTTPException(
+                    status_code=400,
+                    detail="La máscara de referencia debe tener las mismas dimensiones que las imágenes."
+                )
+            # Luminosidad >= 128 en la referencia indica región positiva.
+            gt_gray = cv2.cvtColor(gt_rgb, cv2.COLOR_RGB2GRAY)
+            gt_mask = (gt_gray >= 128).astype("uint8") * 255
+            metrics = evaluate_mask(mask, gt_mask)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    def preview_png(array):
+        height, width = array.shape[:2]
+        if max(height, width) > 900:
+            factor = 900 / max(height, width)
+            array = cv2.resize(
+                array, (round(width * factor), round(height * factor)),
+                interpolation=cv2.INTER_AREA if array.ndim == 3 else cv2.INTER_NEAREST
+            )
+        stream = BytesIO()
+        Image.fromarray(array).save(stream, format="PNG")
+        return base64.b64encode(stream.getvalue()).decode("ascii")
+
+    return {
+        "width": int(ref_rgb.shape[1]),
+        "height": int(ref_rgb.shape[0]),
+        "reference_png_base64": preview_png(ref_rgb),
+        "candidate_png_base64": preview_png(candidate_rgb),
+        "difference_png_base64": preview_png(
+            cv2.convertScaleAbs(diff, alpha=4.0)
+        ),
+        "mask_png_base64": preview_png(mask),
+        "ground_truth_png_base64": preview_png(gt_mask) if gt_mask is not None else None,
+        "evaluation": metrics,
+        "mae": mae,
+        "changed_percent": changed,
+        "threshold": 20,
+        "amplification": 4,
+        "disclaimer": "La diferencia entre dos archivos no identifica la causa del cambio. "
+                      "La compresión, el color, el registro y la edición influyen.",
     }
