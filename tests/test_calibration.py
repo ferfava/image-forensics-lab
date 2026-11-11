@@ -57,6 +57,9 @@ def test_end_to_end_calibration_writes_reports(tmp_path):
     assert (out / "test_by_image_calibrated.csv").exists()
     assert (out / "calibrated_model.joblib").exists()
     assert len(report["maps"]) == 1
+    assert report["maps"][0]["image"]
+    assert report["maps"][0]["group"]
+    assert (out / "error_maps" / ("01_" + report["maps"][0]["group"] + ".png")).is_file()
     assert any((out / "error_maps").glob("*.png"))
     saved = json.loads((out / "calibration_report.json").read_text(encoding="utf-8"))
     assert saved["calibration"]["objective"] == "F0.5"
