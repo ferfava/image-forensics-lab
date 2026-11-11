@@ -163,6 +163,7 @@ form.addEventListener("submit", async event => {
     results.hidden = false;
     status.textContent = "Bordes, histogramas, filtros y ELA procesados.";
     results.scrollIntoView({behavior:"smooth",block:"start"});
+    markCurrentSection("#bordes");
   } catch (error) {
     status.textContent = "No se pudo completar el análisis. " + error.message;
     status.classList.add("error");
@@ -244,6 +245,7 @@ compareForm.addEventListener("submit", async (event) => {
     compareResults.hidden = false;
     compareStatus.textContent = "Comparación completada. Se mantienen las dimensiones originales para el cálculo.";
     compareResults.scrollIntoView({behavior: "smooth", block: "start"});
+    markCurrentSection("#comparador");
   } catch (error) {
     compareStatus.textContent = "No se pudo completar la comparación. " + error.message;
     compareStatus.classList.add("error");
@@ -253,39 +255,37 @@ compareForm.addEventListener("submit", async (event) => {
 });
 
 
-/* Navegación: antes del primer análisis, las técnicas guían a la carga. */
-for (const link of document.querySelectorAll('.sidebar a[data-needs-analysis="true"]')) {
-  link.addEventListener("click", (event) => {
-    if (!document.querySelector("#results").hidden) return;
-    event.preventDefault();
-    document.querySelector("#analyze-form").scrollIntoView({behavior:"smooth",block:"start"});
-    const message = document.querySelector("#status");
-    message.classList.remove("error");
-    message.textContent = "Primero seleccioná una fotografía y ejecutá el análisis para ver esta técnica.";
-  });
-}
-
-
-/* Indicar qué sección seleccionó la persona: navegación real, sin "ACTIVO" fijo. */
-const menuLinks = Array.from(document.querySelectorAll('.sidebar nav a[href^="#"]'));
+/* Índice único 01–07. Los resultados requieren un análisis previo. */
+const menuLinks = [...document.querySelectorAll('.sidebar .tech-navigation a')];
 function markCurrentSection(hash) {
   for (const link of menuLinks) {
-    const active = link.getAttribute("href") === hash;
-    if (active) link.setAttribute("aria-current", "location");
-    else link.removeAttribute("aria-current");
-    link.classList.toggle("selected", active && link.classList.contains("nav-link"));
+    if (link.getAttribute("href") === hash) {
+      link.setAttribute("aria-current", "location");
+    } else {
+      link.removeAttribute("aria-current");
+    }
   }
 }
 for (const link of menuLinks) {
-  link.addEventListener("click", () => {
-    const unavailable = link.dataset.needsAnalysis === "true" &&
-      document.querySelector("#results").hidden;
-    markCurrentSection(unavailable ? "#laboratorio" : link.getAttribute("href"));
+  link.addEventListener("click", (event) => {
+    const needsAnalysis = link.dataset.needsAnalysis === "true";
+    if (needsAnalysis && document.querySelector("#results").hidden) {
+      event.preventDefault();
+      const upload = document.querySelector("#cargar");
+      upload.scrollIntoView({behavior:"smooth",block:"start"});
+      const message = document.querySelector("#status");
+      message.classList.remove("error");
+      message.textContent = "Primero seleccioná una fotografía y ejecutá el análisis para explorar sus resultados.";
+      markCurrentSection("#cargar");
+      return;
+    }
+    markCurrentSection(link.getAttribute("href"));
   });
 }
 window.addEventListener("hashchange", () => {
-  const hash = location.hash;
-  if (menuLinks.some(link => link.getAttribute("href") === hash)) markCurrentSection(hash);
+  const selected = menuLinks.find(link => link.getAttribute("href") === location.hash);
+  if (selected) markCurrentSection(location.hash);
 });
-markCurrentSection(menuLinks.some(link => link.getAttribute("href") === location.hash)
-  ? location.hash : "#laboratorio");
+const initialHash = menuLinks.some(link => link.getAttribute("href") === location.hash)
+  ? location.hash : "#cargar";
+markCurrentSection(initialHash);
