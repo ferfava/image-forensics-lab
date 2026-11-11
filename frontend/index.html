@@ -20,8 +20,10 @@
     <a href="#comparador" class="tech"><span class="tech-number">06</span><span class="tech-name">Comparador de imágenes</span><span class="tech-arrow" aria-hidden="true">›</span></a>
     <a href="#metodos" class="tech"><span class="tech-number">07</span><span class="tech-name">Acerca del laboratorio</span><span class="tech-arrow" aria-hidden="true">›</span></a>
   </nav>
-  <div class="nav-label">EN DESARROLLO</div>
-  <div class="research-note"><span class="research-note-title">Machine Learning</span><small>Investigación experimental · No disponible en la demo web</small></div>
+  <div class="nav-label">INVESTIGACIÓN</div>
+  <nav class="tech-navigation" aria-label="Machine Learning experimental">
+    <a href="#machine-learning" class="tech"><span class="tech-number">08</span><span class="tech-name">Machine Learning <small class="ml-nav-subtitle">Experimental · No validado</small></span><span class="tech-arrow" aria-hidden="true">›</span></a>
+  </nav>
   <div class="sidebar-bottom"><span class="status-light"></span> PROTOTIPO ACADÉMICO <small>Versión 0.1 · Investigación en desarrollo</small></div>
 </aside>
 <main id="laboratorio">
@@ -101,11 +103,29 @@
         <p class="result-note">Este procedimiento mide diferencias entre archivos, no probabilidad de manipulación. Para un experimento válido, conservá las mismas dimensiones, registrá el método de exportación y compará con una edición conocida.</p>
       </div>
     </section>
+    <section id="machine-learning" class="ml-section" aria-labelledby="ml-heading">
+      <div class="section-heading"><div><span class="section-number">08 /</span><h2 id="ml-heading">Machine Learning experimental</h2></div><span class="section-aside">SVM · PARCHES 32 × 32</span></div>
+      <div class="info-strip"><span class="info-symbol">ⓘ</span><div><strong>Investigación no validada.</strong> Este clasificador presentó muchas falsas alarmas y omisiones en las pruebas. Sus predicciones NO verifican autenticidad, falsificación ni generación por IA.</div></div>
+      <p class="result-note">La IA analiza una sola fotografía y marca parches que considera sospechosos. Esta herramienta es independiente de la comparación controlada y no utiliza la fotografía original.</p>
+      <p id="ml-availability" class="ml-availability" role="status" aria-live="polite">Comprobando si el modelo está instalado en el servidor…</p>
+      <form id="ml-form">
+        <label class="compare-upload" for="ml-photo"><span>IMAGEN PARA ANÁLISIS EXPERIMENTAL</span><strong>Elegir fotografía JPEG o PNG</strong><input id="ml-photo" type="file" accept="image/jpeg,image/png" required><small>Máximo 12 MB y 1 megapíxel. No se almacenan las imágenes.</small></label>
+        <div class="controlbar"><div class="control-name"><span class="control-icon">◇</span><div><strong>Predicción exploratoria por SVM</strong><small>La máscara se calcula en bloques; no tiene precisión de contorno.</small></div></div><button id="ml-button" type="submit" disabled>Analizar con ML <span>→</span></button></div>
+      </form>
+      <p id="ml-status" class="status" role="status" aria-live="polite"></p>
+      <div id="ml-results" hidden>
+        <div class="compare-grid">
+          <figure><div class="figure-top">REGIONES SEÑALADAS <span class="figure-tag">ROJO · EXPERIMENTAL</span></div><div class="image-stage"><img id="ml-overlay" alt="Superposición roja de parches clasificados como sospechosos"></div><figcaption>Las marcas pueden ser falsas alarmas: no son evidencia de manipulación.</figcaption></figure>
+          <figure><div class="figure-top">MÁSCARA DE BLOQUES <span class="figure-tag">32 × 32</span></div><div class="image-stage"><img id="ml-mask" alt="Máscara binaria de parches marcados por el SVM"></div><figcaption>Blanco = predicción positiva. Negro = predicción negativa.</figcaption></figure>
+        </div>
+        <div class="ela-summary"><div><span>PARCHES SEÑALADOS (SUPERFICIE)</span><strong id="ml-percent">—</strong><small>No es probabilidad de falsificación.</small></div><div><span>MODELO</span><strong id="ml-model">—</strong><small>Clasificador SVM experimental.</small></div><div><span>ESTADO</span><strong>NO VALIDADO</strong><small>Falsos positivos y falsos negativos documentados.</small></div></div>
+      </div>
+    </section>
     <section id="metodos" class="method"><div><span class="section-number">07 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. El laboratorio integra análisis de bordes, histogramas, filtros, ELA y comparación controlada de fotografías. También se investigaron clasificadores de Machine Learning de manera local; sus resultados son experimentales y no certifican autenticidad.</p></section>
     <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
   </div>
 </main>
 </div>
-<script src="./config.js"></script><script src="./app.js"></script>
+<script src="./config.js"></script><script src="./app.js"></script><script src="./ml.js"></script>
 </body>
 </html>
