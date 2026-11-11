@@ -170,7 +170,7 @@ def evaluate_calibrated(manifest: Path, out: Path, seed=42, map_count=4):
         pos = test_positions[start:stop]
         local_y = y[test[pos]]
         local_p = prediction[pos]
-        item = {"group": row["group"], "image": row["image"],
+        item = {"group": row["group"], "image": row["image"], "mask": row["mask"],
                 "patches": int(len(local_y)), "positive_patches": int(local_y.sum())}
         item.update(score(local_y, local_p))
         image_rows.append(item)
