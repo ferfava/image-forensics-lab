@@ -10,18 +10,15 @@
 <div class="shell">
 <aside class="sidebar" aria-label="Navegación del laboratorio">
   <a class="brand" href="./"><span class="brand-icon">⌬</span><span>IMAGE<span class="brand-light">FORENSICS</span><small>LABORATORY / IFTS 18</small></span></a>
-  <div class="nav-label">ESPACIO DE TRABAJO</div>
-  <nav aria-label="Secciones principales">
-    <a href="#laboratorio" class="nav-link selected"><span>▣</span> Laboratorio <span class="nav-dot"></span></a>
-    <a href="#comparador" class="nav-link"><span>⇄</span> Comparar imágenes</a>
-    <a href="#metodos" class="nav-link"><span>◈</span> Metodología</a>
-  </nav>
-  <div class="nav-label">EXPLORAR RESULTADOS</div>
-  <nav class="tech-navigation" aria-label="Ir a una técnica de análisis">
-    <a href="#bordes" class="tech" data-needs-analysis="true"><span class="tech-number">01</span><span class="tech-name">Detección de bordes</span><span class="tech-arrow" aria-hidden="true">›</span></a>
-    <a href="#histogramas" class="tech" data-needs-analysis="true"><span class="tech-number">02</span><span class="tech-name">Histogramas</span><span class="tech-arrow" aria-hidden="true">›</span></a>
-    <a href="#filtrado" class="tech" data-needs-analysis="true"><span class="tech-number">03</span><span class="tech-name">Filtrado y ruido</span><span class="tech-arrow" aria-hidden="true">›</span></a>
-    <a href="#ela" class="tech" data-needs-analysis="true"><span class="tech-number">04</span><span class="tech-name">Análisis ELA / JPEG</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+  <div class="nav-label">RECORRIDO DEL LABORATORIO</div>
+  <nav class="tech-navigation" aria-label="Índice del laboratorio">
+    <a href="#cargar" class="tech"><span class="tech-number">01</span><span class="tech-name">Cargar imagen</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+    <a href="#bordes" class="tech" data-needs-analysis="true"><span class="tech-number">02</span><span class="tech-name">Resultados y bordes</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+    <a href="#histogramas" class="tech" data-needs-analysis="true"><span class="tech-number">03</span><span class="tech-name">Histogramas</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+    <a href="#filtrado" class="tech" data-needs-analysis="true"><span class="tech-number">04</span><span class="tech-name">Filtrado y diferencias</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+    <a href="#ela" class="tech" data-needs-analysis="true"><span class="tech-number">05</span><span class="tech-name">Análisis JPEG · ELA</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+    <a href="#comparador" class="tech"><span class="tech-number">06</span><span class="tech-name">Comparador de imágenes</span><span class="tech-arrow" aria-hidden="true">›</span></a>
+    <a href="#metodos" class="tech"><span class="tech-number">07</span><span class="tech-name">Acerca del laboratorio</span><span class="tech-arrow" aria-hidden="true">›</span></a>
   </nav>
   <div class="nav-label">EN DESARROLLO</div>
   <div class="research-note"><span class="research-note-title">Machine Learning</span><small>Investigación experimental · No disponible en la demo web</small></div>
@@ -32,7 +29,7 @@
   <div class="content">
     <div class="headline"><span class="overline"><span class="pulse"></span> DIGITAL IMAGE FORENSICS · RESEARCH LAB</span><h1>La imagen cuenta una historia.<br><em>Los píxeles, otra.</em></h1><p>Explorá las señales visuales de una fotografía mediante técnicas clásicas de procesamiento digital. Observá, compará y sacá tus propias conclusiones.</p></div>
     <div class="info-strip"><span class="info-symbol">ⓘ</span><div><strong>Análisis exploratorio, no veredicto.</strong> Los mapas generados muestran características visuales y no certifican si una fotografía fue manipulada.</div></div>
-    <div class="section-heading"><div><span class="section-number">01 /</span><h2>Cargar imagen</h2></div><span class="section-aside">FORMATOS JPG · PNG &nbsp; | &nbsp; MÁX. 12 MB</span></div>
+    <div id="cargar" class="section-heading"><div><span class="section-number">01 /</span><h2>Cargar imagen</h2></div><span class="section-aside">FORMATOS JPG · PNG &nbsp; | &nbsp; MÁX. 12 MB</span></div>
     <form id="analyze-form">
       <label class="dropzone" id="dropzone" for="photo" tabindex="0">
         <input id="photo" type="file" accept="image/png,image/jpeg" required>
@@ -104,7 +101,7 @@
         <p class="result-note">Este procedimiento mide diferencias entre archivos, no probabilidad de manipulación. Para un experimento válido, conservá las mismas dimensiones, registrá el método de exportación y compará con una edición conocida.</p>
       </div>
     </section>
-    <section id="metodos" class="method"><div><span class="section-number">07 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. La investigación comparará técnicas clásicas, mapas de características y, en etapas posteriores, modelos de aprendizaje automático utilizando ejemplos con modificaciones controladas.</p></section>
+    <section id="metodos" class="method"><div><span class="section-number">07 /</span><h2>Acerca del laboratorio</h2></div><p>Proyecto individual de Procesamiento de Imágenes · IFTS N.º 18. El laboratorio integra análisis de bordes, histogramas, filtros, ELA y comparación controlada de fotografías. También se investigaron clasificadores de Machine Learning de manera local; sus resultados son experimentales y no certifican autenticidad.</p></section>
     <footer><span>IMAGE FORENSICS LAB © 2026</span><span>FERNANDA ANDREA FAVA · IFTS N.º 18</span></footer>
   </div>
 </main>
