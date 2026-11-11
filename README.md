@@ -310,3 +310,35 @@ explícitamente un modelo fiable en el sistema de archivos del servidor y
 configurar `ML_MODEL_PATH` para apuntar a él. Este trabajo **no** realizó esa
 instalación, no habilita ML automáticamente en Vercel/Render y no afirma que
 el SVM detecte falsificaciones de manera confiable.
+
+## Casos de prueba guiados integrados al frontend
+
+La página incluye **tres escenas sintéticas reproducibles** (faro costero,
+escritorio y calle nocturna) en `frontend/samples.js`. **No son fotografías
+del dataset IMD2020 ni material utilizado para entrenar el SVM.**
+
+Cada tarjeta genera directamente en el navegador, a resolución fija de
+**768 × 512 píxeles**, tres archivos PNG:
+- Original: escena sin modificación.
+- Editada: misma escena con una región rectangular agregada.
+- Máscara: negro como fondo, blanco como delimitación exacta de la región editada.
+
+Botones disponibles:
+- **Probar comparación:** carga original + editada + máscara y ejecuta el
+  comparador, mostrando precisión, recall, F1 e IoU por píxel.
+- **Analizar imagen:** carga la editada y ejecuta Canny, histogramas, filtros
+  y ELA.
+- **Probar SVM:** carga la editada en ML y ejecuta el modelo si el backend lo
+  tiene instalado. Si no está instalado, indica que el modelo no está disponible.
+
+Estos ejemplos demuestran la **integración del software**, pero no demuestran
+capacidad de detección autónoma en fotografías reales. El SVM puede fallar
+incluso en estos ejemplos; no se retocaron las escenas para maximizar su
+resultado ni se utilizaron para seleccionar un umbral. Se ofrecen imágenes
+preparadas para evitar archivos incompatibles y facilitar la práctica del
+profesor y sus estudiantes.
+
+**Comprobación posterior al despliegue:** usar cada uno de los tres botones de
+una tarjeta desde una sesión nueva. La evaluación del comparador debe mostrar
+los resultados de la máscara controlada; la disponibilidad de ML depende de
+`GET /api/ml/status`.
