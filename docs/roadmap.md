@@ -3,7 +3,8 @@ Actualizado: 11 de noviembre de 2026. Diferenciar funcionalidades web y ML exper
 
 ## Implementado y medido
 - [x] Frontend HTML/CSS/JS y backend FastAPI con conexión pública observada en navegador.
-- [x] Menú unificado 01–07 y navegación hacia secciones del laboratorio.
+- [x] Menú 01–08 y navegación hacia secciones del laboratorio.
+- [x] Tres casos de ejemplo guiados, con PNG original, editado y máscara generados localmente en el navegador.
 - [x] Canny, histogramas RGB/grises, filtros gaussiano y mediana, residuo.
 - [x] ELA JPEG calidad 90 con amplificación de contraste.
 - [x] Comparación controlada de dos fotografías, máscara, métricas de referencia (precisión, recall, F1 e IoU) por píxel.
@@ -20,6 +21,7 @@ Actualizado: 11 de noviembre de 2026. Diferenciar funcionalidades web y ML exper
 - [x] Guion de demostración y defensa: [guion_defensa.md](guion_defensa.md).
 
 ## Comprobaciones de cierre antes de compartir con el profesor
+- [ ] Verificar en el frontend publicado las tres tarjetas y sus acciones automáticas (comparador, clásico, ML).
 - [ ] Probar el sitio desde una sesión nueva sin caché, confirmando menú 01–07.
 - [ ] Probar una comparación desde cero, con original y edición de iguales dimensiones y máscara opcional.
 - [ ] Confirmar que el despliegue público de Render y Vercel responde de forma consistente.
