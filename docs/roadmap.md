@@ -1,41 +1,31 @@
-# Plan de desarrollo — Image Forensics Lab
-Actualizado noviembre de 2026. Se distinguen funciones implementadas de resultados científicamente validados.
+# Estado de cierre — Image Forensics Lab
+Actualizado: 11 de noviembre de 2026. Diferenciar funcionalidades web y ML experimental.
 
-## 1. Base técnica
-- [x] Repositorio GitHub, backend FastAPI y frontend HTML/CSS/JS.
-- [x] Validación de formato JPEG/PNG y límite de tamaño.
-- [x] Dataset IMD2020 importado y auditado localmente (60 orígenes, 251 imágenes).
-- [ ] Verificar condiciones/licencias y procedencia de datasets para el informe.
+## Implementado y medido
+- [x] Frontend HTML/CSS/JS y backend FastAPI con conexión pública observada en navegador.
+- [x] Menú unificado 01–07 y navegación hacia secciones del laboratorio.
+- [x] Canny, histogramas RGB/grises, filtros gaussiano y mediana, residuo.
+- [x] ELA JPEG calidad 90 con amplificación de contraste.
+- [x] Comparación controlada de dos fotografías, máscara, métricas de referencia (precisión, recall, F1 e IoU) por píxel.
+- [x] Dataset IMD2020 local: 60 grupos, 251 imágenes y 246.699 parches.
+- [x] Random Forest y SVM exploratorios, calibración F0.5 y mapas TP/FP/FN.
+- [x] Comparación V1 (8 variables) / V2 (14 variables) con split por grupo idéntico; V2 no mejoró globalmente.
+- [x] 35 pruebas automáticas aprobadas en ejecución local informada antes de los cambios finales del menú.
+- [x] Merge a main de funcionalidades clásicas y ML local.
+- [x] Informe técnico académico: [informe_final.md](informe_final.md).
+- [x] Guion de demostración y defensa: [guion_defensa.md](guion_defensa.md).
 
-## 2. Procesamiento clásico
-- [x] Histogramas RGB y escala de grises.
-- [x] Canny, filtros gaussiano y mediana, residuo visual.
-- [x] ELA JPEG calidad 90 con contraste visual configurable.
-- [x] Comparación de dos imágenes alineadas, máscaras y F1/IoU de referencia.
-- [ ] Umbralización y morfología explícitas; controles comparables y descarga.
+## Comprobaciones de cierre antes de compartir con el profesor
+- [ ] Probar el sitio desde una sesión nueva sin caché, confirmando menú 01–07.
+- [ ] Probar una comparación desde cero, con original y edición de iguales dimensiones y máscara opcional.
+- [ ] Confirmar que el despliegue público de Render y Vercel responde de forma consistente.
+- [ ] Volver a correr pytest localmente después de los últimos cambios (aunque solo afectaron HTML/CSS/JS/documentación).
+- [ ] Completar referencias académicas y verificar los términos de uso del dataset e imágenes de demostración.
+- [ ] Exportar el informe al formato de entrega solicitado por el profesor, adjuntar capturas originales y guardar respaldo.
 
-## 3. ML experimental
-- [x] Ocho características por parche 32×32.
-- [x] Entrenamiento Random Forest y SVM con separación por origen.
-- [x] Métricas y diagnósticos por fotografía.
-- [x] Código de calibración F0.5 mediante validación; split bloqueado, baseline
-      todo-normal y mapas TP/FP/FN (pendiente ejecutar sobre IMD2020 real).
-- [ ] Ejecutar suite completa y calibración de 60 grupos en la computadora.
-- [ ] Comparar trade-off precisión/recall y revisar mapas de fallas.
-- [ ] Mejorar características solo si los experimentos justifican cambios.
-- [ ] Evaluación final con datos nuevos **nunca inspeccionados** y métricas a nivel
-      de parche y píxel; conservar un holdout fijo y documentar incertidumbre.
+## Fuera de alcance de esta entrega
+- [ ] Validación externa de detector ML con fotografías nuevas y no inspeccionadas.
+- [ ] Detector ML web público: no desplegar mientras el clasificador permanezca no validado.
+- [ ] Otros experimentos, morfología avanzada o CNN, solo como trabajo futuro.
 
-## 4. Aplicación y despliegue
-- [x] Interfaces de análisis clásico y comparación en rama de desarrollo.
-- [x] Inferencia ML local desde una sola imagen.
-- [ ] Integrar inferencia ML en FastAPI y visualización web como herramienta
-      EXPLORATORIA (sin afirmar detección confiable).
-- [ ] Pruebas de integración, manejo de imágenes, rendimiento y errores.
-- [ ] Verificar Vercel/Render, PR e integración a main.
-- [ ] Exportación de resultados.
-
-## 5. Entregable académico
-- [ ] Informe: pregunta, metodología, esquema y licencias de datos, resultados,
-      limitaciones, imágenes reales de TP/FP/FN, referencias y conclusiones.
-- [ ] README reproducible completo y guion de defensa.
+**Cierre académico propuesto:** laboratorio de procesamiento de imágenes funcional y proyecto de clasificación exploratoria. No certifica autenticidad.
