@@ -342,3 +342,45 @@ profesor y sus estudiantes.
 una tarjeta desde una sesión nueva. La evaluación del comparador debe mostrar
 los resultados de la máscara controlada; la disponibilidad de ML depende de
 `GET /api/ml/status`.
+
+
+## Publicar el SVM V1 sin subir archivos pickle
+
+La aplicación acepta un artefacto **NPZ de datos numéricos** compatible con SVM
+RBF, sin ejecutar código de deserialización. El modelo local original
+`v1_model.joblib` se usa **exclusivamente en la computadora que lo entrenó**
+para exportar sus parámetros y comparar las puntuaciones de decisión.
+
+Desde PowerShell en la raíz del repositorio, luego de hacer `git pull`:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m image_forensics.detection.export_portable_v1 --model models/imd2020_v1_v2/v1_model.joblib --out backend/assets/svm_v1.npz
+```
+
+El exportador exige pipeline `StandardScaler+SVC` binario RBF, ocho variables,
+parches 32 y estado experimental. Genera `backend/assets/svm_v1.npz` y
+compara resultados de ambos modelos sobre puntos próximos a los vectores de
+soporte; si no coinciden, elimina el archivo de salida.
+
+**Antes de publicarlo:** revisar si está permitido compartir pesos derivados
+del dataset de entrenamiento. El archivo NPZ expone parámetros y vectores de
+soporte; puede revelar características de datos de origen. Solo después de
+verificar la procedencia y aceptar su publicación en este repositorio público:
+
+```powershell
+git add backend/assets/svm_v1.npz
+git commit -m "data: add verified portable experimental SVM V1"
+git push origin main
+```
+
+Render ya construye automáticamente desde `main`. Al existir el NPZ en la
+carpeta `backend/assets`, el backend lo utiliza **por defecto**, salvo que
+`ML_MODEL_PATH` apunte a otro archivo. El NPZ debe probarse con el endpoint
+`/api/ml/status` y una imagen real desde el frontend después del deploy. Para
+desactivar temporalmente el modelo, retirar el archivo del despliegue y volver
+a desplegar. El antiguo `.joblib` no se publica.
+
+**Límites:** esto solo completa el despliegue de inferencia; el SVM permanece
+`EXPERIMENTAL_NO_VALIDADO`, tiene falsos positivos abundantes y no certifica
+alteraciones.
