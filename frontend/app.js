@@ -251,3 +251,16 @@ compareForm.addEventListener("submit", async (event) => {
     button.disabled = false;
   }
 });
+
+
+/* Navegación: antes del primer análisis, las técnicas guían a la carga. */
+for (const link of document.querySelectorAll('.sidebar a[data-needs-analysis="true"]')) {
+  link.addEventListener("click", (event) => {
+    if (!document.querySelector("#results").hidden) return;
+    event.preventDefault();
+    document.querySelector("#analyze-form").scrollIntoView({behavior:"smooth",block:"start"});
+    const message = document.querySelector("#status");
+    message.classList.remove("error");
+    message.textContent = "Primero seleccioná una fotografía y ejecutá el análisis para ver esta técnica.";
+  });
+}
