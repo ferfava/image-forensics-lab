@@ -7,12 +7,18 @@ import numpy as np
 from PIL import Image
 
 from image_forensics.features.patches import FEATURE_NAMES, patch_features, patch_map
+from image_forensics.features.patches_v2 import FEATURE_NAMES_V2, patch_features_v2
 
 
 def infer_image(rgb: np.ndarray, artifact: dict):
-    if tuple(artifact["feature_names"]) != FEATURE_NAMES:
+    schema = tuple(artifact["feature_names"])
+    if schema == FEATURE_NAMES:
+        extraction = patch_features
+    elif schema == FEATURE_NAMES_V2:
+        extraction = patch_features_v2
+    else:
         raise ValueError("Esquema de características incompatible.")
-    features, boxes, shape = patch_features(rgb, artifact["patch_size"])
+    features, boxes, shape = extraction(rgb, artifact["patch_size"])
     estimator = artifact["estimator"]
     if "threshold" in artifact:
         if not hasattr(estimator, "decision_function"):
