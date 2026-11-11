@@ -12,6 +12,10 @@ Actualizado: 11 de noviembre de 2026. Diferenciar funcionalidades web y ML exper
 - [x] Comparación V1 (8 variables) / V2 (14 variables) con split por grupo idéntico; V2 no mejoró globalmente.
 - [x] 35 pruebas automáticas aprobadas en ejecución local informada antes de los cambios finales del menú.
 - [x] Merge a main de funcionalidades clásicas y ML local.
+- [x] Interfaz ML experimental y endpoints opcionales con mensajes de disponibilidad y advertencias.
+- [ ] Instalar y probar el artefacto SVM local en el backend web mediante ML_MODEL_PATH.
+- [ ] Ejecutar pruebas automáticas después de la integración ML y revisar los resultados.
+- [ ] Decidir si se ofrece demostración ML en servidor público; hoy Render no tiene un modelo instalado confirmado.
 - [x] Informe técnico académico: [informe_final.md](informe_final.md).
 - [x] Guion de demostración y defensa: [guion_defensa.md](guion_defensa.md).
 
