@@ -18,7 +18,7 @@ from image_forensics.evaluation.segmentation import evaluate_mask  # noqa: E402
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
 import os
-origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500").split(",") if s.strip()]
+origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,https://image-forensics-lab-frontend.vercel.app").split(",") if s.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
