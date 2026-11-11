@@ -20,6 +20,8 @@ from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
 from image_forensics.processing.comparison import compare_rgb  # noqa: E402
 from image_forensics.evaluation.segmentation import evaluate_mask  # noqa: E402
 from image_forensics.detection.infer import infer_image  # noqa: E402
+from image_forensics.features.patches import FEATURE_NAMES  # noqa: E402
+from image_forensics.features.patches_v2 import FEATURE_NAMES_V2  # noqa: E402
 
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
@@ -167,6 +169,10 @@ def _trusted_ml_artifact():
         raise ValueError("El artefacto no tiene un estado experimental válido.")
     if not isinstance(artifact.get("patch_size"), int) or artifact["patch_size"] != 32:
         raise ValueError("Tamaño de parche del modelo incompatible.")
+    if tuple(artifact.get("feature_names", ())) not in (FEATURE_NAMES, FEATURE_NAMES_V2):
+        raise ValueError("Esquema de características incompatible.")
+    if not hasattr(artifact.get("estimator"), "predict"):
+        raise ValueError("Clasificador faltante o incompatible.")
     return artifact
 
 
