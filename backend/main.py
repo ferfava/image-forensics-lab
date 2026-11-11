@@ -1,8 +1,13 @@
 """API académica: validación y mapa exploratorio de bordes, no detector de falsificaciones."""
 import base64
+import os
 import sys
+from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
+
+import joblib
+import numpy as np
 
 import cv2
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -14,10 +19,10 @@ from image_forensics.preprocessing.image_io import decode_rgb, MAX_UPLOAD_BYTES 
 from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
 from image_forensics.processing.comparison import compare_rgb  # noqa: E402
 from image_forensics.evaluation.segmentation import evaluate_mask  # noqa: E402
+from image_forensics.detection.infer import infer_image  # noqa: E402
 
 app = FastAPI(title="Image Forensics Lab API", version="0.1.0")
 # Configurar CORS_ORIGINS al desplegar (lista separada por comas).
-import os
 origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,https://image-forensics-lab-frontend.vercel.app").split(",") if s.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 
@@ -141,4 +146,82 @@ async def compare_images(
         "amplification": 4,
         "disclaimer": "La diferencia entre dos archivos no identifica la causa del cambio. "
                       "La compresión, el color, el registro y la edición influyen.",
+    }
+
+
+# Experimental ML is opt-in. Only operators may configure a trusted local model
+# through the server environment. Never deserialize untrusted uploaded joblib files.
+ML_MODEL_PATH = os.getenv("ML_MODEL_PATH", "").strip()
+ML_MAX_PIXELS = 1_000_000
+
+
+@lru_cache(maxsize=1)
+def _trusted_ml_artifact():
+    if not ML_MODEL_PATH:
+        raise FileNotFoundError("Modelo experimental no configurado.")
+    source = Path(ML_MODEL_PATH).expanduser().resolve()
+    if not source.is_file():
+        raise FileNotFoundError("No se encontró el modelo experimental configurado.")
+    artifact = joblib.load(source)  # Trusted operator-controlled local file ONLY.
+    if not isinstance(artifact, dict) or artifact.get("status") != "EXPERIMENTAL_NO_VALIDADO":
+        raise ValueError("El artefacto no tiene un estado experimental válido.")
+    if not isinstance(artifact.get("patch_size"), int) or artifact["patch_size"] != 32:
+        raise ValueError("Tamaño de parche del modelo incompatible.")
+    return artifact
+
+
+@app.get("/api/ml/status")
+def ml_status():
+    if not ML_MODEL_PATH:
+        return {"available": False, "reason": "Modelo de investigación no instalado en el servidor."}
+    try:
+        artifact = _trusted_ml_artifact()
+        return {"available": True, "model": str(artifact.get("feature_version", "v1")).upper(),
+                "status": artifact["status"], "patch_size": artifact["patch_size"]}
+    except (FileNotFoundError, ValueError, OSError):
+        return {"available": False, "reason": "Modelo experimental no disponible."}
+
+
+@app.post("/api/ml/predict")
+def ml_predict(file: UploadFile = File(...)):
+    """Research-only single-image patch map; never an authenticity verdict."""
+    if not ML_MODEL_PATH:
+        raise HTTPException(status_code=503, detail="El modelo experimental aún no está disponible.")
+    try:
+        artifact = _trusted_ml_artifact()
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        raise HTTPException(status_code=503, detail="Modelo experimental no disponible.") from exc
+    # File reads/decoding are synchronous here so they execute in FastAPI's threadpool.
+    # UploadFile.file is a SpooledTemporaryFile already bounded after reading.
+    raw = file.file.read(MAX_UPLOAD_BYTES + 1)
+    try:
+        rgb = decode_rgb(raw)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if rgb.shape[0] * rgb.shape[1] > ML_MAX_PIXELS:
+        raise HTTPException(status_code=413, detail="Para ML experimental usá imágenes de hasta 1 megapíxel.")
+    if min(rgb.shape[:2]) < artifact["patch_size"]:
+        raise HTTPException(status_code=400, detail="La imagen es demasiado pequeña para los parches del modelo.")
+    mask = infer_image(rgb, artifact)
+    # Preserve native binary patch boundaries; only resize the PREVIEW for transport.
+    overlay = rgb.copy()
+    hit = mask > 0
+    overlay[hit] = np.clip(overlay[hit].astype(np.float32) * 0.55
+                           + np.array([255, 73, 83], dtype=np.float32) * 0.45,
+                           0, 255).astype(np.uint8)
+    def png_base64(arr):
+        buffer = BytesIO()
+        Image.fromarray(arr).save(buffer, format="PNG")
+        return base64.b64encode(buffer.getvalue()).decode("ascii")
+    return {
+        "model": str(artifact.get("feature_version", "v1")).upper(),
+        "status": "EXPERIMENTAL_NO_VALIDADO",
+        "width": int(rgb.shape[1]), "height": int(rgb.shape[0]),
+        "patch_size": artifact["patch_size"],
+        "suspect_percent": round(float((mask > 0).mean() * 100), 2),
+        "overlay_png_base64": png_base64(overlay),
+        "mask_png_base64": png_base64(mask),
+        "disclaimer": ("Las marcas señalan parches que el modelo clasifica como sospechosos. "
+                       "Contiene falsos positivos y falsos negativos; NO determina si una imagen es auténtica "
+                       "ni indica una probabilidad de falsificación."),
     }
