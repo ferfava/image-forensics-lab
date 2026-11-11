@@ -20,6 +20,7 @@ from image_forensics.processing.ela import compute_ela_raw  # noqa: E402
 from image_forensics.processing.comparison import compare_rgb  # noqa: E402
 from image_forensics.evaluation.segmentation import evaluate_mask  # noqa: E402
 from image_forensics.detection.infer import infer_image  # noqa: E402
+from image_forensics.detection.portable_svm import load_portable_artifact  # noqa: E402
 from image_forensics.features.patches import FEATURE_NAMES  # noqa: E402
 from image_forensics.features.patches_v2 import FEATURE_NAMES_V2  # noqa: E402
 
@@ -153,7 +154,9 @@ async def compare_images(
 
 # Experimental ML is opt-in. Only operators may configure a trusted local model
 # through the server environment. Never deserialize untrusted uploaded joblib files.
-ML_MODEL_PATH = os.getenv("ML_MODEL_PATH", "").strip()
+DEFAULT_SAFE_MODEL = Path(__file__).resolve().parent / "assets" / "svm_v1.npz"
+ML_MODEL_PATH = (os.getenv("ML_MODEL_PATH", "").strip()
+                 or (str(DEFAULT_SAFE_MODEL) if DEFAULT_SAFE_MODEL.is_file() else ""))
 ML_MAX_PIXELS = 1_000_000
 
 
@@ -164,14 +167,20 @@ def _trusted_ml_artifact():
     source = Path(ML_MODEL_PATH).expanduser().resolve()
     if not source.is_file():
         raise FileNotFoundError("No se encontró el modelo experimental configurado.")
-    artifact = joblib.load(source)  # Trusted operator-controlled local file ONLY.
+    if source.suffix.lower() == ".npz":
+        artifact = load_portable_artifact(source)  # NumPy, allow_pickle=False.
+    elif source.suffix.lower() == ".joblib":
+        artifact = joblib.load(source)  # ONLY operator-controlled LOCAL training artifact.
+    else:
+        raise ValueError("Solo se aceptan modelos .npz o .joblib locales.")
     if not isinstance(artifact, dict) or artifact.get("status") != "EXPERIMENTAL_NO_VALIDADO":
         raise ValueError("El artefacto no tiene un estado experimental válido.")
     if not isinstance(artifact.get("patch_size"), int) or artifact["patch_size"] != 32:
         raise ValueError("Tamaño de parche del modelo incompatible.")
     if tuple(artifact.get("feature_names", ())) not in (FEATURE_NAMES, FEATURE_NAMES_V2):
         raise ValueError("Esquema de características incompatible.")
-    if not hasattr(artifact.get("estimator"), "predict"):
+    if not (hasattr(artifact.get("estimator"), "predict")
+            or hasattr(artifact.get("estimator"), "decision_function")):
         raise ValueError("Clasificador faltante o incompatible.")
     return artifact
 
