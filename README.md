@@ -274,3 +274,39 @@ mirando el resultado de test. **Los grupos de prueba ya fueron revisados en
 ensayos anteriores**: este resultado es exploratorio y será necesario
 reservar un conjunto nuevo nunca visto para el informe de generalización.
 El script no afirma que V2 vaya a mejorar los indicadores.
+
+
+## Módulo web experimental de Machine Learning (opt-in)
+
+Se agregó una sección **08 / Machine Learning experimental** con estado real de
+disponibilidad, máscara por parches y superposición roja. La API implementa
+`GET /api/ml/status` y `POST /api/ml/predict`. La instalación del modelo es
+**opcional**: sin `ML_MODEL_PATH` configurado el frontend explica que no hay
+modelo y deshabilita el botón; las técnicas clásicas continúan funcionando.
+
+Se utiliza un archivo `.joblib` **generado y confiable en el equipo del
+proyecto**. Nunca aceptar modelos enviados por visitantes o descargados sin
+verificación: `joblib.load` ejecuta deserialización insegura para fuentes
+desconocidas. El archivo de modelo no se guarda en GitHub y su mera existencia
+no equivale a validación científica.
+
+Para demostrar V1 **en tu equipo**, en PowerShell desde la raíz del repositorio
+(terminal nueva, con las dependencias del backend instaladas):
+
+```powershell
+$env:ML_MODEL_PATH = "C:\Users\Noxi-PC\Documents\image-forensics-lab\models\imd2020_v1_v2\v1_model.joblib"
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload --port 8000
+```
+
+El modelo V1 se conserva como punto de referencia exploratorio. Para el frontend
+local, configurar temporalmente `frontend/config.js` con
+`http://127.0.0.1:8000`, sin subir ese cambio a GitHub. Servir `frontend/`
+por HTTP como se indica arriba. La nueva API limita cada imagen ML a
+**1 megapíxel** y 12 MB, para reducir carga computacional; no redimensiona
+automáticamente la fotografía porque alteraría sus características.
+
+**Despliegue público:** para habilitar ML en Render hay que instalar
+explícitamente un modelo fiable en el sistema de archivos del servidor y
+configurar `ML_MODEL_PATH` para apuntar a él. Este trabajo **no** realizó esa
+instalación, no habilita ML automáticamente en Vercel/Render y no afirma que
+el SVM detecte falsificaciones de manera confiable.
