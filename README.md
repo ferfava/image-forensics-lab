@@ -2,7 +2,7 @@
 
 Laboratorio académico de procesamiento y análisis exploratorio de imágenes digitales. Trabajo final individual · Procesamiento de Imágenes · IFTS 18.
 
-> **Alcance científico:** la aplicación muestra características visuales y artefactos de procesamiento; no determina si una imagen es auténtica o falsa. No existe todavía un detector entrenado o validado.
+> **Alcance científico:** la aplicación muestra características visuales y artefactos de procesamiento; no determina si una imagen es auténtica o falsa. Existen clasificadores experimentales entrenados localmente, pero ninguno está validado ni publicado como detector de autenticidad.
 
 ## Arquitectura
 - `frontend/`: interfaz web estática (HTML, CSS, JavaScript), alojable en Vercel.
@@ -37,12 +37,11 @@ uvicorn backend.main:app --reload
 
 Servir la carpeta `frontend/` con un servidor estático (por ejemplo, desde `frontend`: `python -m http.server 5500`). Editar `frontend/config.js` para apuntar a `http://localhost:8000` durante el desarrollo local. Configurar `CORS_ORIGINS` en el backend para el origen exacto del frontend.
 
-## Trabajo pendiente
-- Experimentar con textura, umbralización y morfología.
-- Preparar fotografías con modificaciones controladas y máscaras de referencia.
-- Validar con un dataset real la extracción por regiones, Random Forest y SVM ya implementados como prototipo experimental.
-- Registrar métricas (precisión, recall, F1, IoU), limitaciones e informe académico.
-- Validar despliegues, integración y pruebas antes de integrar a `main`.
+## Estado del proyecto y pendientes de entrega
+- Implementados ELA, comparación controlada, histogramas, bordes y filtros.
+- Realizados experimentos de clasificación sobre IMD2020 con Random Forest y SVM, incluyendo calibración y comparación V1/V2.
+- El módulo ML sigue siendo exclusivamente experimental, sin validación externa ni acceso público desde el frontend.
+- Pendiente: verificar despliegue frontend/backend desde Internet y preparar informe académico final; las métricas no certifican autenticidad.
 
 Ver [protocolo](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
 
@@ -80,7 +79,7 @@ Si ambas máscaras están vacías se devuelve 1.0 por coincidencia perfecta, aco
 
 ## ML experimental (sin desplegar al público)
 
-Primer prototipo **local** con Random Forest y SVM. La entrada de inferencia es **una sola imagen**, sin referencia original. Extrae por parches de 32 × 32: intensidad y desviación estándar, Laplaciano, densidad de bordes, gradiente, variación RGB y residuo JPEG. Elige entre RF y SVM según F1 en validación; reporta métricas finales una sola vez sobre test no visto, separado por fotografía de origen.
+Primer prototipo **local** con Random Forest y SVM. La entrada de inferencia es **una sola imagen**, sin referencia original. Extrae por parches de 32 × 32: intensidad y desviación estándar, Laplaciano, densidad de bordes, gradiente, variación RGB y residuo JPEG. Compara RF y SVM según F1 en validación, usando particiones separadas por fotografía de origen. Las posteriores inspecciones del conjunto de prueba impiden tratar sus métricas como un benchmark independiente definitivo.
 
 En PowerShell desde la raíz:
 ```powershell
