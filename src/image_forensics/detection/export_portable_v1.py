@@ -51,8 +51,9 @@ def export_v1(model_file: Path, output: Path):
     np.savez_compressed(output, **payload)
     portable = load_portable_artifact(output)
     rng = np.random.default_rng(2026)
-    # Compare scores on arbitrary feature vectors; not an accuracy test.
-    reference = rng.normal(loc=70, scale=40, size=(20, len(FEATURE_NAMES)))
+    # Check points near training support vectors, where decision values vary.
+    indexes = rng.choice(len(svc.support_vectors_), size=min(30, len(svc.support_vectors_)), replace=False)
+    reference = (svc.support_vectors_[indexes] + rng.normal(0, 0.04, size=(len(indexes), len(FEATURE_NAMES)))) * scaler.scale_ + scaler.mean_
     expected = model.decision_function(reference)
     actual = portable["estimator"].decision_function(reference)
     max_diff = float(np.max(np.abs(expected - actual)))
