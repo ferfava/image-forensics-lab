@@ -158,14 +158,15 @@
         status.textContent="Imagen editada cargada para analizar bordes, filtros y ELA.";
       } else if(action==="ml") {
         const file=await toPngFile(images.edited,name+"_editada.png");
-        setFile(document.querySelector("#ml-photo"),file);
         document.querySelector("#machine-learning").scrollIntoView({behavior:"smooth",block:"start"});
-        if(!document.querySelector("#ml-button").disabled) {
-          document.querySelector("#ml-form").requestSubmit();
-          status.textContent="Predicción SVM iniciada. No equivale a validación del modelo.";
-        } else {
-          status.textContent="Ejemplo listo en ML; el servidor actual no tiene modelo instalado.";
+        if (!window.imageForensicsML?.runSample) {
+          throw new Error("El módulo ML aún no terminó de cargarse.");
         }
+        const launched = await window.imageForensicsML.runSample(file);
+        status.textContent = launched
+          ? "Ejemplo enviado al SVM experimental. Consultá el resultado en la sección 08."
+          : "Ejemplo preparado; el SVM no está instalado en este servidor. Consultá el aviso en la sección 08.";
+        if (!launched) status.classList.add("error");
       }
     } catch(error) {
       status.classList.add("error");
