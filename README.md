@@ -174,12 +174,12 @@ Las rutas se resuelven relativas al CSV: no mover el CSV solo.
 ## Diagnóstico por imagen y ampliación progresiva del dataset
 
 Después del ensayo inicial de 30 grupos, ampliar a **60 grupos** (no a todas las
-imágenes de golpe), usando el dataset extraído en Windows:
+imágenes de golpe), usando el dataset extraído en Windows. Reemplazar `C:\ruta\a\IMD2020` por la ubicación real del dataset de cada persona:
 
 ```powershell
-.\.venv\Scripts\python.exe -m image_forensics.detection.import_imd2020 --root "C:\Users\Noxi-PC\Pictures\dataset" --max-groups 60
-.\.venv\Scripts\python.exe -m image_forensics.detection.audit_dataset --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv"
-.\.venv\Scripts\python.exe -m image_forensics.detection.train --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv" --out models/imd2020_60
+.\.venv\Scripts\python.exe -m image_forensics.detection.import_imd2020 --root "C:\ruta\a\IMD2020" --max-groups 60
+.\.venv\Scripts\python.exe -m image_forensics.detection.audit_dataset --manifest "C:\ruta\a\IMD2020\manifest_imd2020.csv"
+.\.venv\Scripts\python.exe -m image_forensics.detection.train --manifest "C:\ruta\a\IMD2020\manifest_imd2020.csv" --out models/imd2020_60
 ```
 
 **Importante:** el segundo importador reemplaza el CSV `manifest_imd2020.csv`,
@@ -217,7 +217,7 @@ A partir del dataset IMD2020 auditado con **60 grupos**:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m image_forensics.detection.calibrate --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv" --out models/imd2020_60_calibrated
+.\.venv\Scripts\python.exe -m image_forensics.detection.calibrate --manifest "C:\ruta\a\IMD2020\manifest_imd2020.csv" --out models/imd2020_60_calibrated
 ```
 
 El proceso vuelve a extraer características y **entrena un SVM nuevo**. No se
@@ -268,9 +268,9 @@ imagen original durante inferencia.
 la calibración anterior; si falta `split.json`, el script no inventa uno.
 
 ```powershell
-git pull --ff-only origin feature/jpeg-ela-analysis
+git pull --ff-only origin main
 .\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe -m image_forensics.detection.compare_v2 --manifest "C:\Users\Noxi-PC\Pictures\dataset\manifest_imd2020.csv" --split models/imd2020_60_calibrated/split.json --out models/imd2020_v1_v2
+.\.venv\Scripts\python.exe -m image_forensics.detection.compare_v2 --manifest "C:\ruta\a\IMD2020\manifest_imd2020.csv" --split models/imd2020_60_calibrated/split.json --out models/imd2020_v1_v2
 ```
 
 El entrenamiento V1 y V2 puede consumir CPU por la SVM; muestra progreso
@@ -308,7 +308,7 @@ Para demostrar V1 **en tu equipo**, en PowerShell desde la raíz del repositorio
 (terminal nueva, con las dependencias del backend instaladas):
 
 ```powershell
-$env:ML_MODEL_PATH = "C:\Users\Noxi-PC\Documents\image-forensics-lab\models\imd2020_v1_v2\v1_model.joblib"
+$env:ML_MODEL_PATH = "$PWD\models\imd2020_v1_v2\v1_model.joblib"
 .\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload --port 8000
 ```
 
