@@ -1,6 +1,6 @@
 # Guion de demostración y defensa — Image Forensics Lab
 
-**Duración objetivo:** 5–7 minutos. **Preparación:** enlace público abierto, dos fotografías de las mismas dimensiones (referencia y edición controlada) y una máscara binaria opcional. No depender de ML durante la demo.
+**Duración objetivo:** 5–7 minutos. **Preparación:** enlace público abierto, un caso guiado del laboratorio y capturas de respaldo por si el servicio gratuito demora en responder. El SVM V1 está disponible públicamente, pero sigue sin validación científica.
 
 ## Demostración en vivo
 
@@ -8,8 +8,8 @@
 2. **Carga y análisis (1 min):** cargar una foto JPEG/PNG, ejecutar análisis, mostrar Canny y explicar que localiza cambios de intensidad.
 3. **Histogramas y filtros (1 min):** recorrer RGB/grises, gaussiano, mediana y residuo; distinguir una representación visual de una conclusión forense.
 4. **ELA (1 min):** mostrar original y mapa JPEG calidad 90, mover el control de contraste. Aclarar que el ajuste es visual, no cambia la medida ni prueba edición.
-5. **Comparador (1–2 min):** cargar referencia y una versión con modificación conocida, conservando dimensiones. Mostrar diferencia, máscara y porcentaje. Si se dispone de máscara real independiente, cargarla y explicar precisión, recall, F1 e IoU **por píxel**.
-6. **ML (1 min):** mostrar el informe y uno de los mapas de error locales. Contar que V1 (8 variables) y V2 (14) se evaluaron en las mismas particiones y V2 no mejoró globalmente. Evitar presentar la inferencia ML como funcionalidad pública.
+5. **Comparador (1–2 min):** elegir **«Faro y señal → Probar comparación»**; el frontend carga original, versión editada y máscara de referencia independiente. Mostrar diferencia, porcentaje y métricas de precisión, recall, F1 e IoU **por píxel**.
+6. **ML (1 min):** elegir **«Escritorio y nota → Probar SVM»** y mostrar la superposición roja y la máscara generadas por el SVM V1 público. Explicar que el porcentaje señalado **no** es porcentaje de falsificación; mencionar que V2 (14 variables) no mejoró globalmente a V1 (8 variables), y que la inferencia pública demuestra integración técnica, no detección fiable.
 
 ## Respuestas breves
 
@@ -34,9 +34,10 @@
 ## Comprobación previa
 
 - [ ] Abrir https://image-forensics-lab-frontend.vercel.app/ en una ventana privada.
-- [ ] Verificar que se muestren las siete secciones del menú en orden.
+- [ ] Verificar que se muestren las ocho secciones del menú y los tres ejemplos guiados.
 - [ ] Cargar una imagen y comprobar Canny, histogramas, filtros y ELA.
-- [ ] Comparar dos imágenes de iguales dimensiones; revisar máscara y métricas.
+- [ ] Ejecutar un ejemplo guiado en el comparador; revisar máscara y métricas.
+- [ ] Ejecutar «Probar SVM» y comprobar superposición, máscara y porcentaje en el frontend público.
 - [ ] Preparar capturas de respaldo por si Render tarda en responder.
 - [ ] Corroborar referencias, autoría de imágenes y requisitos del profesor.
 
