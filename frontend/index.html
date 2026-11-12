@@ -133,9 +133,9 @@
       <p id="ml-availability" class="ml-availability" role="status" aria-live="polite">Comprobando si el modelo está instalado en el servidor…</p>
       <form id="ml-form">
         <label class="compare-upload" for="ml-photo"><span>IMAGEN PARA ANÁLISIS EXPERIMENTAL</span><strong>Elegir fotografía JPEG o PNG</strong><input id="ml-photo" type="file" accept="image/jpeg,image/png" required><small>Máximo 12 MB y 1 megapíxel. No se almacenan las imágenes.</small></label>
+        <p id="ml-status" class="status" role="status" aria-live="polite"></p>
         <div class="controlbar"><div class="control-name"><span class="control-icon">◇</span><div><strong>Predicción exploratoria por SVM</strong><small>La máscara se calcula en bloques; no tiene precisión de contorno.</small></div></div><button id="ml-button" type="submit" disabled>Analizar con ML <span>→</span></button></div>
       </form>
-      <p id="ml-status" class="status" role="status" aria-live="polite"></p>
       <div id="ml-results" hidden>
         <div class="compare-grid">
           <figure><div class="figure-top">REGIONES SEÑALADAS <span class="figure-tag">ROJO · EXPERIMENTAL</span></div><div class="image-stage"><img id="ml-overlay" alt="Superposición roja de parches clasificados como sospechosos"></div><figcaption>Las marcas pueden ser falsas alarmas: no son evidencia de manipulación.</figcaption></figure>
