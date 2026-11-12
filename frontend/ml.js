@@ -1,6 +1,7 @@
 /* Módulo ML experimental: siempre muestra estado real del backend. */
 const mlForm = document.querySelector("#ml-form");
 const mlButton = document.querySelector("#ml-button");
+const defaultMlButtonContent = mlButton.innerHTML;
 const mlAvailability = document.querySelector("#ml-availability");
 const mlStatus = document.querySelector("#ml-status");
 const mlResults = document.querySelector("#ml-results");
@@ -47,7 +48,10 @@ mlForm.addEventListener("submit", async (event) => {
   }
   mlBusy = true;
   mlButton.disabled = true;
-  mlStatus.textContent = "Extrayendo características y clasificando parches…";
+  mlButton.textContent = "Analizando imagen…";
+  mlButton.setAttribute("aria-busy", "true");
+  mlStatus.textContent = "Analizando el ejemplo con SVM V1. El servidor gratuito puede tardar en responder; la imagen ya se envió.";
+  mlStatus.scrollIntoView({behavior: "smooth", block: "center"});
   try {
     const payload = new FormData();
     payload.append("file", file);
@@ -70,6 +74,8 @@ mlForm.addEventListener("submit", async (event) => {
     mlStatus.classList.add("error");
   } finally {
     mlBusy = false;
+    mlButton.innerHTML = defaultMlButtonContent;
+    mlButton.removeAttribute("aria-busy");
     mlButton.disabled = !mlAvailable;
   }
 });
@@ -84,6 +90,7 @@ window.imageForensicsML = {
       transfer.items.add(file);
       return transfer.files;
     })();
+    mlStatus.textContent = "Comprobando disponibilidad del modelo y preparando el ejemplo…";
     const available = await checkMlAvailability();
     if (!available) {
       mlStatus.textContent = "El ejemplo quedó cargado, pero el SVM no está instalado en este servidor. " +
@@ -91,7 +98,7 @@ window.imageForensicsML = {
       mlStatus.classList.add("error");
       return false;
     }
-    mlForm.requestSubmit();
+    mlForm.requestSubmit(mlButton);
     return true;
   }
 };
