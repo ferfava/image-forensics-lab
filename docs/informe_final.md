@@ -24,17 +24,35 @@ Objetivos específicos:
 4. Construir un prototipo de aprendizaje supervisado por parche y evaluar sus errores.
 5. Documentar las limitaciones y evitar inferencias injustificadas sobre autenticidad.
 
-Se diferencian dos escenarios: **comparación asistida con imagen de referencia** (aplicación web) y **predicción local sobre una imagen desconocida** (ML experimental). Son problemas distintos y sus métricas no deben mezclarse.
+Se diferencian dos escenarios: **comparación asistida con imagen de referencia** (aplicación web) y **predicción sobre una sola imagen** (ML experimental). Son problemas distintos y sus métricas no deben mezclarse.
 
 ## 2. Arquitectura y tecnologías
 
-- **Frontend:** HTML, CSS y JavaScript; despliegue previsto en Vercel.
-- **Backend:** Python, FastAPI y OpenCV; API pública prevista en Render.
+- **Frontend:** HTML, CSS y JavaScript; desplegado en Vercel.
+- **Backend:** Python, FastAPI y OpenCV; API pública desplegada en Render.
 - **Procesamiento:** NumPy, OpenCV y Pillow.
 - **Aprendizaje supervisado:** scikit-learn, StandardScaler, RandomForestClassifier y SVC (kernel RBF).
 - **Ensayos reproducibles:** pytest; repositorio GitHub con código, pruebas y documentación.
 
-La aplicación recibe fotografías JPEG/PNG de hasta 12 MB y valida un límite de 16 megapíxeles. La API no almacena las imágenes de las solicitudes. La inferencia de ML se ejecuta localmente y **no** forma parte del servicio público.
+La aplicación recibe fotografías JPEG/PNG de hasta 12 MB y valida un límite de 16 megapíxeles. La API no almacena las imágenes de las solicitudes. La inferencia del SVM V1 funciona tanto localmente como en el servicio público, mediante un artefacto numérico NPZ exportado del modelo original.
+
+### 2.1 Estado del despliegue público (noviembre de 2026)
+
+El frontend de Vercel consume la API FastAPI de Render. El clasificador V1 se distribuye como
+`backend/assets/svm_v1.npz` (no como un archivo pickle): contiene coeficientes
+y vectores de soporte del SVM RBF y se cargó con `allow_pickle=False`.
+La exportación se verificó frente al modelo original con diferencia máxima en
+puntuaciones de aproximadamente **4,1 × 10⁻¹⁰** (comprobación numérica, **no**
+de precisión de detección). Las **40 pruebas automáticas** pasaron en el equipo
+de desarrollo antes de la publicación. Una demostración pública real generó
+superposición y máscara por parches; sobre el ejemplo sintético de escritorio,
+el modelo señaló **36,46 % de la superficie**, lo cual **no** representa el
+porcentaje realmente modificado ni una probabilidad de falsificación.
+
+Se incluyen tres escenas sintéticas controladas generadas en el frontend
+(costa, escritorio y ciudad), cada una con original, editada y máscara de
+referencia. Sirven para ilustrar el flujo del laboratorio, **no** forman parte
+del entrenamiento y **no** validan el SVM en fotografías reales.
 
 ## 3. Técnicas clásicas implementadas
 
