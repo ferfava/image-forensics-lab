@@ -1,18 +1,31 @@
 # Image Forensics Lab
 
-Laboratorio académico de procesamiento y análisis exploratorio de imágenes digitales. Trabajo final individual · Procesamiento de Imágenes · IFTS 18.
+**Laboratorio web de procesamiento digital y análisis exploratorio de imágenes**  
+Trabajo final individual de **Procesamiento de Imágenes · IFTS N.º 18 · Noviembre de 2026**  
+**Autora:** Fernanda Andrea Fava
 
-> **Alcance científico:** la aplicación muestra características visuales y artefactos de procesamiento; no determina si una imagen es auténtica o falsa. Existen clasificadores experimentales entrenados localmente, pero ninguno está validado ni publicado como detector de autenticidad.
+[**Abrir el laboratorio**](https://image-forensics-lab-frontend.vercel.app/) · [**API pública**](https://image-forensics-api-pi9r.onrender.com/api/ml/status) · [**Informe técnico**](docs/informe_final.md) · [**Guion de defensa**](docs/guion_defensa.md)
 
-## Entrega académica (noviembre de 2026)
+> **Alcance académico:** la aplicación permite observar bordes, histogramas, residuos, ELA, diferencias entre imágenes y predicciones experimentales por parches. **No determina si una imagen es auténtica, falsa o generada por IA.** El SVM V1 está desplegado, pero permanece **EXPERIMENTAL_NO_VALIDADO** por sus falsas alarmas, omisiones y falta de validación externa.
+
+## Cómo probarlo (sin instalar nada)
+
+1. Entrar al [frontend público](https://image-forensics-lab-frontend.vercel.app/).
+2. Elegir uno de los **tres casos guiados**: *Faro y señal*, *Escritorio y nota* o *Calle nocturna*. Son escenas sintéticas de 768 × 512 píxeles generadas en el navegador; no pertenecen al dataset de entrenamiento.
+3. Seleccionar **Probar comparación** para cargar original, versión modificada y máscara de referencia independiente, y ver diferencias y métricas por píxel.
+4. Seleccionar **Analizar imagen** para explorar Canny, histogramas, filtros y ELA.
+5. Seleccionar **Probar SVM** para ejecutar la inferencia V1 **en Render** sobre la imagen modificada y visualizar superposición roja, máscara de parches y superficie señalada. Esta última **no es probabilidad de falsificación ni una medición de precisión**.
+
+El plan gratuito del servidor puede tardar en responder al reactivarse. El botón de ML queda temporalmente inactivo **durante** la predicción y muestra el estado de procesamiento.
+
+## Entrega académica
 
 - [Informe técnico y resultados experimentales](docs/informe_final.md).
 - [Guion de demostración y defensa oral](docs/guion_defensa.md).
-- [Lista de verificaciones pendientes antes de entregar](docs/roadmap.md).
-- [Aplicación web](https://image-forensics-lab-frontend.vercel.app/).
+- [Estado y comprobaciones pendientes](docs/roadmap.md).
+- [Protocolo experimental](docs/experimental_protocol.md).
 
-**Importante:** la aplicación web demuestra procesamiento clásico y comparación
-controlada; las pruebas ML locales no constituyen un detector forense validado.
+**Estado comprobado:** interfaz pública, API FastAPI, comparador y ML V1 desplegados. Se observó una inferencia pública completa del SVM con superposición, máscara y porcentaje de superficie señalada. **La disponibilidad y el rendimiento científico son conceptos distintos:** que la herramienta responda no implica validez forense.
 
 ## Arquitectura
 - `frontend/`: interfaz web estática (HTML, CSS, JavaScript), alojable en Vercel.
@@ -50,8 +63,8 @@ Servir la carpeta `frontend/` con un servidor estático (por ejemplo, desde `fro
 ## Estado del proyecto y pendientes de entrega
 - Implementados ELA, comparación controlada, histogramas, bordes y filtros.
 - Realizados experimentos de clasificación sobre IMD2020 con Random Forest y SVM, incluyendo calibración y comparación V1/V2.
-- El módulo ML sigue siendo exclusivamente experimental, sin validación externa ni acceso público desde el frontend.
-- Pendiente: verificar despliegue frontend/backend desde Internet y preparar informe académico final; las métricas no certifican autenticidad.
+- El SVM V1 está disponible en la web mediante un artefacto NPZ numérico y la API de Render; sigue **sin validación externa** y no certifica autenticidad.
+- Informe y defensa preparados; queda comprobar los requisitos formales de entrega y mantener las advertencias de alcance científico.
 
 Ver [protocolo](docs/experimental_protocol.md) y [roadmap](docs/roadmap.md).
 
@@ -87,7 +100,7 @@ Se comparan los píxeles marcados por la máscara detectada (máxima diferencia 
 
 Si ambas máscaras están vacías se devuelve 1.0 por coincidencia perfecta, acompañado del indicador `empty_case=true`. Un valor alto mide coincidencia frente a la máscara suministrada, **no certificación de autenticidad**. Las máscaras de referencia deben delinearse a partir de la edición conocida, no a partir de la predicción, para evitar una evaluación circular.
 
-## ML experimental (sin desplegar al público)
+## Desarrollo del clasificador ML experimental
 
 Primer prototipo **local** con Random Forest y SVM. La entrada de inferencia es **una sola imagen**, sin referencia original. Extrae por parches de 32 × 32: intensidad y desviación estándar, Laplaciano, densidad de bordes, gradiente, variación RGB y residuo JPEG. Compara RF y SVM según F1 en validación, usando particiones separadas por fotografía de origen. Las posteriores inspecciones del conjunto de prueba impiden tratar sus métricas como un benchmark independiente definitivo.
 
@@ -276,19 +289,20 @@ reservar un conjunto nuevo nunca visto para el informe de generalización.
 El script no afirma que V2 vaya a mejorar los indicadores.
 
 
-## Módulo web experimental de Machine Learning (opt-in)
+## Módulo web de Machine Learning experimental
 
-Se agregó una sección **08 / Machine Learning experimental** con estado real de
+La sección **08 / Machine Learning experimental** muestra el estado real de
 disponibilidad, máscara por parches y superposición roja. La API implementa
-`GET /api/ml/status` y `POST /api/ml/predict`. La instalación del modelo es
-**opcional**: sin `ML_MODEL_PATH` configurado el frontend explica que no hay
-modelo y deshabilita el botón; las técnicas clásicas continúan funcionando.
+`GET /api/ml/status` y `POST /api/ml/predict`. **El modelo V1 portable está
+instalado en el servicio público de Render.** Si falta el modelo, la interfaz
+lo indica sin impedir las técnicas clásicas.
 
 Se utiliza un archivo `.joblib` **generado y confiable en el equipo del
 proyecto**. Nunca aceptar modelos enviados por visitantes o descargados sin
 verificación: `joblib.load` ejecuta deserialización insegura para fuentes
-desconocidas. El archivo de modelo no se guarda en GitHub y su mera existencia
-no equivale a validación científica.
+desconocidas. El archivo local `.joblib` no se publica. Su versión exportada a formato
+numérico `.npz` sí forma parte del repositorio para permitir la demostración
+pública; esto no equivale a validación científica.
 
 Para demostrar V1 **en tu equipo**, en PowerShell desde la raíz del repositorio
 (terminal nueva, con las dependencias del backend instaladas):
@@ -305,11 +319,12 @@ por HTTP como se indica arriba. La nueva API limita cada imagen ML a
 **1 megapíxel** y 12 MB, para reducir carga computacional; no redimensiona
 automáticamente la fotografía porque alteraría sus características.
 
-**Despliegue público:** para habilitar ML en Render hay que instalar
-explícitamente un modelo fiable en el sistema de archivos del servidor y
-configurar `ML_MODEL_PATH` para apuntar a él. Este trabajo **no** realizó esa
-instalación, no habilita ML automáticamente en Vercel/Render y no afirma que
-el SVM detecte falsificaciones de manera confiable.
+**Despliegue público verificado:** el repositorio contiene
+`backend/assets/svm_v1.npz`, exportado y comparado numéricamente con el SVM
+local. La API de Render lo reconoce automáticamente en ausencia de una ruta
+`ML_MODEL_PATH` alternativa, y se observó una predicción completa en el
+frontend de Vercel. **Desplegado no significa validado:** el SVM no detecta
+manipulaciones de forma confiable y no debe utilizarse para autenticar fotos.
 
 ## Casos de prueba guiados integrados al frontend
 
@@ -363,10 +378,11 @@ parches 32 y estado experimental. Genera `backend/assets/svm_v1.npz` y
 compara resultados de ambos modelos sobre puntos próximos a los vectores de
 soporte; si no coinciden, elimina el archivo de salida.
 
-**Antes de publicarlo:** revisar si está permitido compartir pesos derivados
-del dataset de entrenamiento. El archivo NPZ expone parámetros y vectores de
-soporte; puede revelar características de datos de origen. Solo después de
-verificar la procedencia y aceptar su publicación en este repositorio público:
+**Publicación realizada con autorización de la autora:** el archivo NPZ
+contiene parámetros y vectores de soporte derivados del conjunto experimental,
+que pueden revelar características de datos de origen. El hecho de contar con
+la autorización de la autora **no reemplaza** la revisión de términos de
+distribución del dataset IMD2020. El commit se incorporó a la rama `main`:
 
 ```powershell
 git add backend/assets/svm_v1.npz
@@ -374,13 +390,13 @@ git commit -m "data: add verified portable experimental SVM V1"
 git push origin main
 ```
 
-Render ya construye automáticamente desde `main`. Al existir el NPZ en la
+Render despliega automáticamente desde `main`. Al existir el NPZ en la
 carpeta `backend/assets`, el backend lo utiliza **por defecto**, salvo que
-`ML_MODEL_PATH` apunte a otro archivo. El NPZ debe probarse con el endpoint
-`/api/ml/status` y una imagen real desde el frontend después del deploy. Para
+`ML_MODEL_PATH` apunte a otro archivo. El NPZ se comprobó mediante el endpoint público
+`/api/ml/status` y una inferencia completa desde el frontend después del deploy. Para
 desactivar temporalmente el modelo, retirar el archivo del despliegue y volver
 a desplegar. El antiguo `.joblib` no se publica.
 
-**Límites:** esto solo completa el despliegue de inferencia; el SVM permanece
+**Límites:** este despliegue completa la integración técnica; el SVM permanece
 `EXPERIMENTAL_NO_VALIDADO`, tiene falsos positivos abundantes y no certifica
 alteraciones.
