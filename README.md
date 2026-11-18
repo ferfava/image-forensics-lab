@@ -1,5 +1,33 @@
 # Image Forensics Lab
 
+## Datos académicos y presentación
+
+- **Materia:** Procesamiento de Imágenes.
+- **Año y cuatrimestre de cursada:** 2026 · segundo cuatrimestre.
+- **Estudiante:** Fernanda Andrea Fava.
+- **Docente:** Juan Ignacio Bonini.
+- **Institución:** IFTS N.º 18.
+- **Modalidad:** Trabajo final individual.
+
+### Motivación: ¿por qué desarrollé este proyecto?
+
+Elegí crear Image Forensics Lab para aplicar los contenidos de Procesamiento de Imágenes a un problema concreto: observar y comparar transformaciones visuales que pueden pasar inadvertidas al examinar una fotografía a simple vista. Mi objetivo fue reunir técnicas de procesamiento clásico —bordes, filtros, histogramas, residuos y recompresión JPEG— en un laboratorio web accesible, que también permitiera experimentar con aprendizaje automático y comprender sus limitaciones.
+
+La aplicación fue concebida como una herramienta **educativa y exploratoria**, no como un certificador de autenticidad: una diferencia visual o una predicción del modelo no demuestran por sí solas que una imagen fue falsificada.
+
+### Problemáticas encontradas y cómo las abordé
+
+| Desafío | Resolución o aprendizaje |
+| --- | --- |
+| Comparar imágenes sin confundir artefactos de compresión, iluminación y exportación con manipulaciones. | Implementé diferencias RGB, ELA y comparaciones controladas; añadí advertencias explícitas sobre interpretación y uso. |
+| Medir los cambios con una referencia verificable. | Incorporé una máscara de referencia opcional y métricas de precisión, recall, F1 e IoU; también diseñé tres casos sintéticos guiados con modificaciones conocidas. |
+| Evitar filtraciones entre entrenamiento y evaluación de imágenes derivadas del mismo original. | Organicé las particiones por grupo de fotografía de origen y audité el dataset antes de entrenar. |
+| Obtener un clasificador confiable. | Experimenté con Random Forest y SVM, revisé falsos positivos y falsos negativos y **mantuve el modelo desplegado identificado como EXPERIMENTAL_NO_VALIDADO**, sin afirmar una precisión forense que los resultados no respaldan. |
+| Publicar una experiencia web utilizable con procesamiento Python. | Separé un frontend estático en Vercel de una API FastAPI en Render y probé su integración, contemplando la latencia de activación del servicio gratuito. |
+
+Estas decisiones y los resultados se desarrollan con mayor detalle en el [informe técnico](docs/informe_final.md) y en el [estado del proyecto](docs/roadmap.md).
+
+
 **Laboratorio web de procesamiento digital y análisis exploratorio de imágenes**  
 Trabajo final individual de **Procesamiento de Imágenes · IFTS N.º 18 · Noviembre de 2026**  
 **Autora:** Fernanda Andrea Fava
